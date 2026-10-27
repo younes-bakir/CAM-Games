@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon City Defender</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- hud -->
+    <header>
+        <div class="hud-title">Neon Defender</div>
+        <div class="hud-status">
+            <div class="status-item">
+                <span>TIME TO BREACH</span>
+                <div class="timer-alert">00:45</div>
+            </div>
+            <div class="status-item">
+                <span>SHIELD INTEGRITY</span>
+                <div class="shield-good">80%</div>
+            </div>
+            <div class="status-item">
+                <span>SCORE</span>
+                <div>0240</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- main game window -->
+    <main>
+        <!-- incoming notifs -->
+        <section class="feed-container">
+            
+            <!-- update -->
+            <div class="card real-update">
+                <div class="card-info">
+                    <h3>Kernel Patch v4.1.2</h3>
+                    <p>Source: Trusted Core Dev | Size: 45MB</p>
+                </div>
+                <div class="card-actions">
+                    <button class="btn-patch">APPLY PATCH</button>
+                    <button class="btn-dismiss">IGNORE</button>
+                </div>
+            </div>
+
+            <!-- fake popup -->
+            <div class="card fake-ad">
+                <div class="card-info">
+                    <h3>CRITICAL WARNING: RAM IS FULL!</h3>
+                    <p>Click to download more memory instantly.</p>
+                </div>
+                <div class="card-actions">
+                    <button class="btn-patch">APPLY PATCH</button>
+                    <button class="btn-dismiss">IGNORE</button>
+                </div>
+            </div>
+
+            <!-- unchecked card -->
+            <div class="card">
+                <div class="card-info">
+                    <h3>System Hotfix #099</h3>
+                    <p>Source: Unknown Server | Protocol: Insecure</p>
+                </div>
+                <div class="card-actions">
+                    <button class="btn-patch">APPLY PATCH</button>
+                    <button class="btn-dismiss">IGNORE</button>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- sidebar -->
+        <aside class="sidebar">
+            <div class="terminal-log">
+                <p>> Initializing shield nodes...</p>
+                <p>> Warning: Outdated node software detected.</p>
+                <p>> Incoming packets buffering...</p>
+                <p>> Filter active. Awaiting input.</p>
+            </div>
+            <div class="system-specs">
+                <p>TARGET: NEON_CITY_GRID_04</p>
+                <p>THREAT LEVEL: CRITICAL</p>
+            </div>
+        </aside>
+    </main>
+
+</body>
+</html>
