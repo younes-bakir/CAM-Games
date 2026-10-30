@@ -3,16 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neon City: System Defender</title>
+    <title>Neon City: System Defender 64</title>
+    <!-- 64-Bit Retro Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --bg-color: #080811;
-            --primary-cyan: #00f3ff;
-            --alert-magenta: #ff0055;
-            --success-green: #00ff66;
-            --warning-gold: #ffcc00;
-            --card-bg: rgba(16, 20, 38, 0.85);
-            --border-glow: 0 0 12px rgba(0, 243, 255, 0.4);
+            --bg-color: #050510;
+            --retro-cyan: #00f0ff;
+            --retro-magenta: #ff0055;
+            --retro-green: #00ff66;
+            --retro-yellow: #ffee00;
+            --window-bg: #121826;
+            --header-gradient: linear-gradient(90deg, #1e2942, #0f172a);
         }
 
         * {
@@ -20,7 +25,8 @@
             user-select: none;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'VT323', monospace;
+            image-rendering: pixelated;
         }
 
         body {
@@ -33,7 +39,7 @@
             flex-direction: column;
         }
 
-        /* Animated Canvas Background */
+        /* 64-Bit Canvas Background */
         #bgCanvas {
             position: absolute;
             top: 0;
@@ -43,20 +49,20 @@
             z-index: 1;
         }
 
-        /* CRT Overlay */
+        /* CRT Raster Scanlines Filter */
         .crt-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.05), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.05));
             background-size: 100% 4px, 6px 100%;
             z-index: 2;
             pointer-events: none;
         }
 
-        /* Main UI Container */
+        /* App Container */
         #app {
             position: relative;
             z-index: 10;
@@ -64,35 +70,34 @@
             flex-direction: column;
             height: 100%;
             width: 100%;
-            max-width: 1400px;
+            max-width: 1300px;
             margin: 0 auto;
-            padding: 15px;
+            padding: 10px;
         }
 
-        /* Top HUD Header */
+        /* Retro HUD Bar with Focal Reboot Zone */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: var(--card-bg);
-            border: 2px solid var(--primary-cyan);
-            border-radius: 12px;
-            padding: 12px 20px;
-            box-shadow: var(--border-glow);
-            backdrop-filter: blur(8px);
+            background: #0d1322;
+            border: 4px ridge #00f0ff;
+            box-shadow: inset 2px 2px 0px #1e293b, inset -2px -2px 0px #0284c7, 0 0 15px rgba(0, 240, 255, 0.4);
+            padding: 8px 16px;
+            gap: 15px;
         }
 
         .brand-title {
-            font-size: 1.4rem;
-            font-weight: 900;
-            letter-spacing: 2px;
-            color: var(--primary-cyan);
-            text-shadow: 0 0 8px var(--primary-cyan);
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9rem;
+            color: var(--retro-cyan);
+            text-shadow: 2px 2px 0px #000, 0 0 8px var(--retro-cyan);
+            letter-spacing: 1px;
         }
 
         .hud-stats {
             display: flex;
-            gap: 20px;
+            gap: 16px;
             align-items: center;
         }
 
@@ -103,201 +108,212 @@
         }
 
         .stat-label {
-            font-size: 0.7rem;
-            color: #8a99ad;
-            text-transform: uppercase;
+            font-size: 0.9rem;
+            color: #94a3b8;
             letter-spacing: 1px;
         }
 
         .stat-value {
-            font-size: 1.2rem;
-            font-weight: 800;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8rem;
             color: #fff;
+            text-shadow: 2px 2px 0 #000;
         }
 
         /* Shield Bar */
         .shield-container {
-            width: 160px;
+            width: 140px;
         }
 
         .meter-bg {
             width: 100%;
             height: 14px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 7px;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            margin-top: 4px;
+            background: #000;
+            border: 2px solid #334155;
+            box-shadow: inset 1px 1px 0 #000;
+            margin-top: 2px;
+            padding: 1px;
         }
 
         .meter-fill {
             height: 100%;
             width: 100%;
-            background: linear-gradient(90deg, #00ff66, #00f3ff);
-            transition: width 0.3s ease;
-            box-shadow: 0 0 10px var(--success-green);
+            background: linear-gradient(90deg, #00ff66, #00f0ff);
+            transition: width 0.2s steps(10);
         }
 
-        /* Reboot Button & Gauge */
-        .reboot-btn {
-            background: linear-gradient(135deg, #102a45, #1d4ed8);
-            border: 2px solid var(--primary-cyan);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-weight: 800;
-            cursor: pointer;
-            transition: all 0.2s ease;
+        /* FOCAL REBOOT CONTROL PANEL */
+        .reboot-focus-panel {
+            background: linear-gradient(180deg, #1e293b, #0f172a);
+            border: 4px double var(--retro-yellow);
+            padding: 6px 14px;
             display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 0 10px rgba(255, 238, 0, 0.2);
+            min-width: 240px;
+        }
+
+        .reboot-btn {
+            width: 100%;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8rem;
+            background: #334155;
+            border: 3px outset #64748b;
+            color: #888;
+            padding: 10px 14px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
             align-items: center;
             gap: 8px;
+            text-shadow: 1px 1px 0 #000;
+            transition: all 0.2s ease;
         }
 
         .reboot-btn:disabled {
-            opacity: 0.4;
+            opacity: 0.5;
             cursor: not-allowed;
-            border-color: #445;
-            background: #111;
+            border-style: inset;
+            background: #1e293b;
         }
 
         .reboot-btn.ready {
-            background: linear-gradient(135deg, #ff0055, #ffcc00);
-            border-color: #fff;
-            animation: pulse-glow 1s infinite alternate;
+            background: linear-gradient(135deg, #dc2626, #ff0055);
+            border-color: #ffee00;
+            color: #ffee00;
+            animation: reboot-pulse 0.5s infinite alternate;
+            box-shadow: 0 0 20px #ff0055;
             cursor: pointer;
         }
 
-        @keyframes pulse-glow {
-            from { box-shadow: 0 0 8px #ff0055; }
-            to { box-shadow: 0 0 20px #ffcc00; }
+        @keyframes reboot-pulse {
+            from { transform: scale(1); box-shadow: 0 0 10px #ff0055; }
+            to { transform: scale(1.05); box-shadow: 0 0 25px #ffee00; }
         }
 
-        /* Security Ticker */
+        .reboot-gauge-bar {
+            width: 100%;
+            height: 8px;
+            background: #000;
+            border: 1px solid #475569;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+
+        .reboot-gauge-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00f0ff, #ffee00);
+            transition: width 0.3s ease;
+        }
+
+        /* Ticker Bar */
         .ticker-bar {
-            background: rgba(0, 0, 0, 0.6);
-            border-left: 4px solid var(--warning-gold);
-            margin: 10px 0;
-            padding: 8px 15px;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            color: #d1d5db;
+            background: #000;
+            border: 2px solid #334155;
+            border-left: 6px solid var(--retro-yellow);
+            margin: 8px 0;
+            padding: 6px 12px;
+            font-size: 1.1rem;
+            color: #e2e8f0;
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
         .ticker-tag {
-            background: var(--warning-gold);
+            font-family: 'Press Start 2P', cursive;
+            background: var(--retro-yellow);
             color: #000;
-            font-weight: 900;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 0.7rem;
+            padding: 2px 4px;
+            font-size: 0.55rem;
         }
 
-        /* Main Workspace Container */
+        /* Desktop Workspace */
         #desktop-workspace {
             flex: 1;
             position: relative;
-            margin-top: 5px;
-            border-radius: 12px;
+            margin-top: 4px;
+            border: 3px inset #1e293b;
+            background: rgba(5, 5, 16, 0.4);
             overflow: hidden;
-            border: 1px dashed rgba(0, 243, 255, 0.2);
         }
 
-        /* Pop-up Window Styling */
+        /* Pop-up Window Styling (Uniform) */
         .popup-card {
             position: absolute;
-            width: 320px;
-            background: var(--card-bg);
-            border: 2px solid var(--primary-cyan);
-            border-radius: 10px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(12px);
+            width: 310px;
+            background: #0f172a;
+            border: 3px outset #475569;
+            box-shadow: 4px 4px 0px #000;
             z-index: 20;
             overflow: hidden;
-            animation: popup-appear 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            transition: transform 0.1s ease;
+            animation: popup-bounce 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .popup-card.fake-ad {
-            border-color: var(--alert-magenta);
-        }
-
-        @keyframes popup-appear {
-            from { transform: scale(0.6) translateY(20px); opacity: 0; }
-            to { transform: scale(1) translateY(0); opacity: 1; }
+        @keyframes popup-bounce {
+            from { transform: scale(0.7); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
 
         .popup-header {
-            padding: 8px 12px;
-            background: rgba(0, 243, 255, 0.15);
+            padding: 6px 10px;
+            background: linear-gradient(90deg, #1e293b, #0f172a);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .popup-card.fake-ad .popup-header {
-            background: rgba(255, 0, 85, 0.2);
+            border-bottom: 2px solid #334155;
         }
 
         .popup-title {
-            font-size: 0.8rem;
-            font-weight: 800;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: #38bdf8;
+            text-shadow: 1px 1px 0 #000;
         }
 
         .popup-body {
-            padding: 14px;
+            padding: 12px;
         }
 
         .source-badge {
             display: inline-block;
-            font-size: 0.65rem;
+            font-size: 0.95rem;
             padding: 2px 6px;
-            border-radius: 4px;
-            font-weight: 700;
             margin-bottom: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            color: #93c5fd;
+            background: #1e293b;
+            border: 1px solid #475569;
+            color: #38bdf8;
         }
 
         .source-badge.verified {
-            background: rgba(0, 255, 102, 0.2);
-            color: var(--success-green);
-            border: 1px solid var(--success-green);
+            background: #064e3b;
+            color: var(--retro-green);
+            border-color: var(--retro-green);
         }
 
         .popup-desc {
-            font-size: 0.85rem;
-            line-height: 1.3;
-            margin-bottom: 12px;
-            color: #e2e8f0;
+            font-size: 1.15rem;
+            line-height: 1.2;
+            margin-bottom: 10px;
+            color: #cbd5e1;
         }
 
-        /* Progress Decay Bar */
+        /* Timer Bar */
         .timer-bar-bg {
             width: 100%;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
+            height: 6px;
+            background: #000;
         }
 
         .timer-bar-fill {
             height: 100%;
             width: 100%;
-            background: var(--primary-cyan);
-            transition: width 0.1s linear;
+            background: var(--retro-cyan);
         }
 
-        .popup-card.fake-ad .timer-bar-fill {
-            background: var(--alert-magenta);
-        }
-
-        /* Action Buttons */
+        /* Actions */
         .popup-actions {
             display: flex;
             gap: 8px;
@@ -305,171 +321,146 @@
 
         .action-btn {
             flex: 1;
-            padding: 8px 10px;
-            border: none;
-            border-radius: 6px;
-            font-weight: 800;
-            font-size: 0.75rem;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.55rem;
+            padding: 8px 4px;
+            border: 2px outset #94a3b8;
             cursor: pointer;
-            transition: all 0.15s ease;
+            text-shadow: 1px 1px 0 #000;
         }
 
         .btn-install {
-            background: var(--success-green);
-            color: #000;
+            background: #15803d;
+            color: #fff;
         }
 
         .btn-install:hover {
-            background: #33ff88;
-            transform: translateY(-2px);
+            background: #16a34a;
         }
 
         .btn-quarantine {
-            background: var(--alert-magenta);
+            background: #b91c1c;
             color: #fff;
         }
 
         .btn-quarantine:hover {
-            background: #ff3377;
-            transform: translateY(-2px);
+            background: #dc2626;
         }
 
-        /* Controls & Upgrade Bar */
+        /* Bottom Panel */
         .bottom-panel {
-            margin-top: 10px;
+            margin-top: 8px;
             display: flex;
-            gap: 15px;
+            gap: 10px;
         }
 
         .upgrade-card {
             flex: 1;
-            background: var(--card-bg);
-            border: 1px solid rgba(0, 243, 255, 0.3);
-            border-radius: 8px;
-            padding: 10px 14px;
+            background: #0d1322;
+            border: 2px ridge #334155;
+            padding: 8px 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
         .upgrade-info h4 {
-            font-size: 0.85rem;
-            color: var(--primary-cyan);
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--retro-cyan);
+            margin-bottom: 4px;
         }
 
         .upgrade-info p {
-            font-size: 0.7rem;
+            font-size: 0.95rem;
             color: #94a3b8;
         }
 
         .buy-btn {
-            background: linear-gradient(135deg, #059669, #10b981);
-            border: none;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.55rem;
+            background: #047857;
+            border: 2px outset #34d399;
             color: white;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-weight: 800;
-            font-size: 0.75rem;
+            padding: 6px 8px;
             cursor: pointer;
         }
 
         .buy-btn:disabled {
-            background: #334155;
+            background: #1e293b;
+            border-color: #475569;
             color: #64748b;
             cursor: not-allowed;
         }
 
-        /* Reboot Overlay Effects */
-        .reboot-overlay {
-            position: absolute;
+        /* Pure Black End Screen */
+        .black-screen {
+            position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-family: monospace;
-            color: var(--success-green);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease;
+            width: 100vw;
+            height: 100vh;
+            background: #000000;
+            z-index: 500;
+            cursor: pointer;
         }
 
-        .reboot-overlay.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        /* Modal Screens */
+        /* Retro Modals */
         .modal {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(4, 6, 15, 0.9);
+            background: rgba(0, 0, 0, 0.85);
             z-index: 200;
             display: flex;
             justify-content: center;
             align-items: center;
-            backdrop-filter: blur(10px);
         }
 
         .modal-content {
-            background: var(--card-bg);
-            border: 2px solid var(--primary-cyan);
-            border-radius: 16px;
-            padding: 30px;
-            max-width: 500px;
+            background: #0d1322;
+            border: 4px ridge var(--retro-cyan);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.3);
+            padding: 24px;
+            max-width: 520px;
             width: 90%;
             text-align: center;
-            box-shadow: 0 0 30px rgba(0, 243, 255, 0.3);
         }
 
         .modal-title {
-            font-size: 1.8rem;
-            font-weight: 900;
-            color: var(--primary-cyan);
-            margin-bottom: 10px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.2rem;
+            color: var(--retro-cyan);
+            margin-bottom: 12px;
+            text-shadow: 2px 2px 0 #000;
         }
 
         .modal-btn {
-            background: linear-gradient(135deg, #00f3ff, #0066ff);
-            border: none;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.75rem;
+            background: var(--retro-cyan);
+            border: 3px outset #7dd3fc;
             color: #000;
-            font-weight: 900;
-            padding: 12px 28px;
-            border-radius: 8px;
-            font-size: 1rem;
+            padding: 10px 20px;
             cursor: pointer;
-            margin-top: 20px;
-            transition: transform 0.2s ease;
-        }
-
-        .modal-btn:hover {
-            transform: scale(1.05);
+            margin-top: 16px;
         }
 
         .rule-list {
             text-align: left;
-            margin: 15px 0;
-            background: rgba(0, 0, 0, 0.4);
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            line-height: 1.5;
+            margin: 14px 0;
+            background: #000;
+            border: 2px inset #334155;
+            padding: 12px;
+            font-size: 1.1rem;
+            line-height: 1.4;
         }
 
         .rule-list li {
             margin-bottom: 8px;
             list-style-type: none;
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
         }
 
         .hidden {
@@ -485,12 +476,12 @@
     <div id="app">
         <!-- Header HUD -->
         <header>
-            <div class="brand-title">⚡ NEON DEFENDER</div>
+            <div class="brand-title">DEFENDER 64</div>
             
             <div class="hud-stats">
                 <div class="stat-box">
                     <span class="stat-label">REBOOTS</span>
-                    <span class="stat-value" id="rebootsText" style="color:var(--warning-gold);">0 / 3</span>
+                    <span class="stat-value" id="rebootsText" style="color:var(--retro-yellow);">0 / 3</span>
                 </div>
 
                 <div class="stat-box">
@@ -509,28 +500,33 @@
                         <div class="meter-fill" id="shieldBar"></div>
                     </div>
                 </div>
+            </div>
 
+            <!-- FOCAL REBOOT PANEL -->
+            <div class="reboot-focus-panel">
                 <button class="reboot-btn" id="rebootBtn" onclick="triggerReboot()" disabled>
-                    <span>🔄 REBOOT SYSTEM</span>
-                    <span id="rebootChargeText">(0%)</span>
+                    <span>🔄 EXECUTE REBOOT</span>
                 </button>
+                <div class="reboot-gauge-bar">
+                    <div class="reboot-gauge-fill" id="rebootGaugeFill"></div>
+                </div>
             </div>
         </header>
 
-        <!-- Security Directive Ticker -->
+        <!-- Security Ticker -->
         <div class="ticker-bar">
             <span class="ticker-tag">DIRECTIVE</span>
-            <span id="tickerText">Install official patches to restore shield stability. Complete 3 system reboots to win!</span>
+            <span id="tickerText">Install official patches to charge the Reboot Meter! Complete 3 Reboots to finish.</span>
         </div>
 
-        <!-- Desktop Window Workspace -->
+        <!-- Desktop Workspace -->
         <div id="desktop-workspace"></div>
 
-        <!-- Bottom Upgrades Panel -->
+        <!-- Upgrades Panel -->
         <div class="bottom-panel">
             <div class="upgrade-card">
                 <div class="upgrade-info">
-                    <h4>Auto-Update Protocol</h4>
+                    <h4>AUTO-PATCH DAEMON</h4>
                     <p>Auto-patches 25% of verified updates</p>
                 </div>
                 <button class="buy-btn" id="buyAutoUpdate" onclick="buyUpgrade('autoUpdate', 100)">BUY $100</button>
@@ -538,7 +534,7 @@
 
             <div class="upgrade-card">
                 <div class="upgrade-info">
-                    <h4>Official App Store Filter</h4>
+                    <h4>APP STORE FILTER</h4>
                     <p>Highlights verified source badges</p>
                 </div>
                 <button class="buy-btn" id="buyFilter" onclick="buyUpgrade('filter', 150)">BUY $150</button>
@@ -546,7 +542,7 @@
 
             <div class="upgrade-card">
                 <div class="upgrade-info">
-                    <h4>Overclocked Firewall</h4>
+                    <h4>FIREWALL OVERCLOCK</h4>
                     <p>Extends pop-up countdown timers</p>
                 </div>
                 <button class="buy-btn" id="buyTimer" onclick="buyUpgrade('timer', 200)">BUY $200</button>
@@ -554,41 +550,35 @@
         </div>
     </div>
 
-    <!-- System Reboot Overlay -->
-    <div class="reboot-overlay" id="rebootOverlay">
-        <h2 style="font-size: 2rem; margin-bottom: 10px;">[ REBOOTING SYSTEM CORE ]</h2>
-        <p style="margin-bottom: 15px;">PURGING UNTRUSTED PROCESSES & APPLYING PATCHES...</p>
-        <div style="width: 300px; height: 10px; background: #222; border-radius: 5px; overflow: hidden;">
-            <div id="rebootProgress" style="width: 0%; height: 100%; background: var(--success-green); transition: width 1.8s linear;"></div>
-        </div>
-    </div>
+    <!-- Black End Screen (Click to restart) -->
+    <div class="black-screen hidden" id="blackScreen" onclick="restartGame()"></div>
 
     <!-- Start / Tutorial Modal -->
     <div class="modal" id="startModal">
         <div class="modal-content">
-            <h1 class="modal-title">CYBER SYSTEM DEFENDER</h1>
-            <p style="font-size: 0.9rem; color: #a0aec0;">Outdated software threatens the city. Sort official patches from fake pop-up malware!</p>
+            <h1 class="modal-title">SYSTEM DEFENDER 64</h1>
+            <p style="font-size: 1.1rem; color: #94a3b8;">Outdated software threatens the city. Read pop-ups carefully to sort patches from malware!</p>
             
             <ul class="rule-list">
-                <li>✅ <b>INSTALL REAL PATCHES:</b> Official updates fix security bugs and repair system shields (+15%).</li>
-                <li>☣️ <b>QUARANTINE FAKE ADS:</b> Fake pop-ups damage shields if installed or allowed to expire.</li>
-                <li>🔄 <b>RESTART 3 TIMES TO WIN:</b> Charge your Reboot Gauge to 100% and execute 3 system reboots to fully secure Neon City.</li>
+                <li>✅ <b>INSTALL REAL PATCHES:</b> Builds Reboot energy & repairs shields (+15%).</li>
+                <li>☣️ <b>QUARANTINE FAKE ADS:</b> Prevents malware infection & shield damage.</li>
+                <li>🔄 <b>REBOOT TO FINISH:</b> Every patch fills the central <b>REBOOT METER</b>. Complete 3 Reboots to complete defense!</li>
             </ul>
 
-            <button class="modal-btn" onclick="startGame()">START DEFENSE PROTOCOL</button>
+            <button class="modal-btn" onclick="startGame()">START DEFENSE</button>
         </div>
     </div>
 
     <!-- Game Over Modal -->
     <div class="modal hidden" id="gameOverModal">
-        <div class="modal-content" style="border-color: var(--alert-magenta);">
-            <h1 class="modal-title" style="color: var(--alert-magenta);">SYSTEM BREACHED</h1>
-            <p style="font-size: 0.9rem; color: #a0aec0;">Unpatched vulnerabilities caused a total city shield collapse.</p>
+        <div class="modal-content" style="border-color: var(--retro-magenta);">
+            <h1 class="modal-title" style="color: var(--retro-magenta);">SYSTEM BREACHED</h1>
+            <p style="font-size: 1.1rem; color: #94a3b8;">Unpatched vulnerabilities caused a total city shield collapse.</p>
 
-            <div style="margin: 20px 0; background: rgba(0,0,0,0.5); padding: 15px; border-radius: 8px;">
-                <p>Time Survived: <b id="finalTime" style="color:var(--primary-cyan);">0s</b></p>
-                <p>Patches Applied: <b id="finalPatches" style="color:var(--success-green);">0</b></p>
-                <p>Threats Quarantined: <b id="finalQuarantines" style="color:var(--warning-gold);">0</b></p>
+            <div style="margin: 16px 0; background: #000; border: 2px inset #334155; padding: 12px; font-size: 1.2rem;">
+                <p>Time Survived: <b id="finalTime" style="color:var(--retro-cyan);">0s</b></p>
+                <p>Patches Applied: <b id="finalPatches" style="color:var(--retro-green);">0</b></p>
+                <p>Threats Quarantined: <b id="finalQuarantines" style="color:var(--retro-yellow);">0</b></p>
                 <p>Reboots Completed: <b id="finalReboots" style="color:#fff;">0 / 3</b></p>
             </div>
 
@@ -596,25 +586,8 @@
         </div>
     </div>
 
-    <!-- Victory Modal -->
-    <div class="modal hidden" id="victoryModal">
-        <div class="modal-content" style="border-color: var(--success-green); box-shadow: 0 0 30px rgba(0, 255, 102, 0.4);">
-            <h1 class="modal-title" style="color: var(--success-green);">SYSTEM SECURED!</h1>
-            <p style="font-size: 0.9rem; color: #a0aec0;">All critical patches are installed and 3 system reboots were completed!</p>
-
-            <div style="margin: 20px 0; background: rgba(0,0,0,0.5); padding: 15px; border-radius: 8px;">
-                <p>Clear Time: <b id="vicTime" style="color:var(--primary-cyan);">0s</b></p>
-                <p>Patches Applied: <b id="vicPatches" style="color:var(--success-green);">0</b></p>
-                <p>Threats Quarantined: <b id="vicQuarantines" style="color:var(--warning-gold);">0</b></p>
-                <p>City Status: <b style="color:var(--success-green);">100% PROTECTED</b></p>
-            </div>
-
-            <button class="modal-btn" style="background: linear-gradient(135deg, #00ff66, #00f3ff);" onclick="restartGame()">PLAY AGAIN</button>
-        </div>
-    </div>
-
     <script>
-        // --- Web Audio API Synthesizer ---
+        // --- Web Audio API Synth ---
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         let audioCtx = null;
 
@@ -632,51 +605,41 @@
             const now = audioCtx.currentTime;
 
             if (type === 'install') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(440, now);
-                osc.frequency.exponentialRampToValueAtTime(880, now + 0.15);
-                gain.gain.setValueAtTime(0.2, now);
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(350, now);
+                osc.frequency.setValueAtTime(700, now + 0.08);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.16);
+                osc.start(now);
+                osc.stop(now + 0.16);
+            } else if (type === 'quarantine') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(250, now);
+                osc.frequency.linearRampToValueAtTime(90, now + 0.15);
+                gain.gain.setValueAtTime(0.18, now);
                 gain.gain.linearRampToValueAtTime(0, now + 0.15);
                 osc.start(now);
                 osc.stop(now + 0.15);
-            } else if (type === 'quarantine') {
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(300, now);
-                osc.frequency.exponentialRampToValueAtTime(100, now + 0.2);
-                gain.gain.setValueAtTime(0.25, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.2);
-                osc.start(now);
-                osc.stop(now + 0.2);
             } else if (type === 'damage') {
                 osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(120, now);
-                osc.frequency.linearRampToValueAtTime(40, now + 0.3);
-                gain.gain.setValueAtTime(0.3, now);
+                osc.frequency.setValueAtTime(110, now);
+                osc.frequency.linearRampToValueAtTime(30, now + 0.25);
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.25);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            } else if (type === 'reboot') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.exponentialRampToValueAtTime(540, now + 0.3);
+                gain.gain.setValueAtTime(0.2, now);
                 gain.gain.linearRampToValueAtTime(0, now + 0.3);
                 osc.start(now);
                 osc.stop(now + 0.3);
-            } else if (type === 'reboot') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(200, now);
-                osc.frequency.exponentialRampToValueAtTime(600, now + 0.5);
-                gain.gain.setValueAtTime(0.3, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.5);
-                osc.start(now);
-                osc.stop(now + 0.5);
-            } else if (type === 'victory') {
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(523.25, now);
-                osc.frequency.setValueAtTime(659.25, now + 0.15);
-                osc.frequency.setValueAtTime(783.99, now + 0.30);
-                osc.frequency.setValueAtTime(1046.50, now + 0.45);
-                gain.gain.setValueAtTime(0.3, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.7);
-                osc.start(now);
-                osc.stop(now + 0.7);
             }
         }
 
-        // --- Game Data & Templates ---
+        // --- Data Templates ---
         const REAL_PATCHES = [
             { title: "OS Security Patch v14.2", source: "Official Settings", desc: "Fixes zero-day memory vulnerability in system kernel." },
             { title: "Browser Security Hotfix", source: "Official App Store", desc: "Patches critical exploit executing untrusted web scripts." },
@@ -685,9 +648,9 @@
         ];
 
         const FAKE_ADS = [
-            { title: "⚠️ 99 VIRUSES DETECTED!", source: "External Pop-up", desc: "CRITICAL ALERT! Click here to download CleanMaster Pro immediately!" },
-            { title: "🎉 YOU WON A FREE LAPTOP!", source: "Ad Network", desc: "You are the 1,000,000th visitor! Claim your prize now!" },
-            { title: "🚀 BOOST RAM SPEED 500%", source: "Unknown Web Page", desc: "Your PC is slow! Install Turbo Optimizer now to unlock full speed." },
+            { title: "99 VIRUSES DETECTED!", source: "External Pop-up", desc: "CRITICAL ALERT! Click here to download CleanMaster Pro immediately!" },
+            { title: "YOU WON A FREE LAPTOP!", source: "Ad Network", desc: "You are the 1,000,000th visitor! Claim your prize now!" },
+            { title: "BOOST RAM SPEED 500%", source: "Unknown Web Page", desc: "Your PC is slow! Install Turbo Optimizer now to unlock full speed." },
             { title: "SYSTEM CRITICAL WARNING", source: "Unverified Plugin", desc: "Driver corrupt! Click Install to repair Windows registry." }
         ];
 
@@ -698,7 +661,7 @@
             "Restart your system when required so updates can complete installation."
         ];
 
-        // --- Game State Variables ---
+        // --- State ---
         let gameState = {
             active: false,
             shield: 100,
@@ -712,20 +675,12 @@
             patchesApplied: 0,
             threatsQuarantined: 0,
             nextPopupId: 1,
-            upgrades: {
-                autoUpdate: false,
-                filter: false,
-                timerExt: 0
-            }
+            upgrades: { autoUpdate: false, filter: false, timerExt: 0 }
         };
 
-        let timers = {
-            gameLoop: null,
-            spawnLoop: null,
-            tickerLoop: null
-        };
+        let timers = { gameLoop: null, spawnLoop: null, tickerLoop: null };
 
-        // --- Canvas Background Animation ---
+        // --- Canvas Graphics ---
         const canvas = document.getElementById('bgCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -738,34 +693,31 @@
 
         let gridOffset = 0;
         function drawBackground() {
-            ctx.fillStyle = '#080811';
+            ctx.fillStyle = '#050510';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Horizon Neon Skyline
-            const horizonY = canvas.height * 0.55;
+            const horizonY = canvas.height * 0.52;
             
-            // Draw City Silhouettes
             ctx.fillStyle = '#0f172a';
-            for (let i = 0; i < canvas.width; i += 60) {
-                const h = Math.sin(i * 0.05) * 80 + 100;
-                ctx.fillRect(i, horizonY - h, 50, h);
+            for (let i = 0; i < canvas.width; i += 40) {
+                const h = Math.floor((Math.sin(i * 0.08) * 60 + 80) / 10) * 10;
+                ctx.fillRect(i, horizonY - h, 36, h);
             }
 
-            // Draw Synthwave Grid
-            ctx.strokeStyle = 'rgba(0, 243, 255, 0.2)';
-            ctx.lineWidth = 1;
+            ctx.strokeStyle = 'rgba(0, 240, 255, 0.25)';
+            ctx.lineWidth = 2;
 
-            gridOffset = (gridOffset + 0.5) % 30;
+            gridOffset = (gridOffset + 0.4) % 24;
 
-            for (let x = 0; x < canvas.width; x += 40) {
+            for (let x = 0; x < canvas.width; x += 50) {
                 ctx.beginPath();
                 ctx.moveTo(x, horizonY);
                 ctx.lineTo((x - canvas.width / 2) * 3 + canvas.width / 2, canvas.height);
                 ctx.stroke();
             }
 
-            for (let y = horizonY; y < canvas.height; y += 15) {
-                const drawY = y + (gridOffset * (y - horizonY) / 200);
+            for (let y = horizonY; y < canvas.height; y += 14) {
+                const drawY = y + (gridOffset * (y - horizonY) / 180);
                 if (drawY < canvas.height) {
                     ctx.beginPath();
                     ctx.moveTo(0, drawY);
@@ -778,12 +730,12 @@
         }
         drawBackground();
 
-        // --- Game Logic Functions ---
+        // --- Logic ---
         function startGame() {
             initAudio();
             document.getElementById('startModal').classList.add('hidden');
             document.getElementById('gameOverModal').classList.add('hidden');
-            document.getElementById('victoryModal').classList.add('hidden');
+            document.getElementById('blackScreen').classList.add('hidden');
 
             gameState = {
                 active: true,
@@ -804,27 +756,23 @@
             document.getElementById('desktop-workspace').innerHTML = '';
             updateHUD();
 
-            // Main 1s Timer
             timers.gameLoop = setInterval(() => {
                 if (!gameState.active) return;
                 gameState.timeElapsed++;
                 document.getElementById('timerText').innerText = `${gameState.timeElapsed}s`;
             }, 1000);
 
-            // Paced Pop-up Spawner
             timers.spawnLoop = setInterval(() => {
                 if (!gameState.active) return;
                 spawnPopupsBatch(2);
             }, 3500);
 
-            // Directive Ticker Rotation
             let tickerIdx = 0;
             timers.tickerLoop = setInterval(() => {
                 tickerIdx = (tickerIdx + 1) % DIRECTIVES.length;
                 document.getElementById('tickerText').innerText = DIRECTIVES[tickerIdx];
             }, 6000);
 
-            // Initial Spawn
             spawnPopupsBatch(2);
         }
 
@@ -838,11 +786,10 @@
         function createPopup() {
             const isReal = Math.random() < 0.5;
 
-            // Auto-update perk auto-clears real patches
             if (isReal && gameState.upgrades.autoUpdate && Math.random() < 0.3) {
                 gameState.credits += 15;
                 gameState.patchesApplied++;
-                addRebootCharge(15);
+                addRebootCharge(20);
                 updateHUD();
                 return;
             }
@@ -852,7 +799,7 @@
                 : FAKE_ADS[Math.floor(Math.random() * FAKE_ADS.length)];
 
             const workspace = document.getElementById('desktop-workspace');
-            const maxX = Math.max(10, workspace.clientWidth - 340);
+            const maxX = Math.max(10, workspace.clientWidth - 330);
             const maxY = Math.max(10, workspace.clientHeight - 220);
 
             const popup = {
@@ -872,7 +819,7 @@
         function renderPopupDOM(popup) {
             const workspace = document.getElementById('desktop-workspace');
             const card = document.createElement('div');
-            card.className = `popup-card ${popup.isReal ? '' : 'fake-ad'}`;
+            card.className = `popup-card`;
             card.id = `popup-${popup.id}`;
             card.style.left = `${popup.x}px`;
             card.style.top = `${popup.y}px`;
@@ -881,14 +828,14 @@
 
             card.innerHTML = `
                 <div class="popup-header">
-                    <span class="popup-title">${popup.isReal ? '🛡️ SYSTEM UPDATE' : '⚠️ SYSTEM ALERT'}</span>
-                    <span style="font-size:0.7rem; opacity:0.6;">#${popup.id}</span>
+                    <span class="popup-title">⚙️ SYSTEM NOTIFICATION</span>
+                    <span style="font-size:0.9rem; opacity:0.6;">#${popup.id}</span>
                 </div>
                 <div class="popup-body">
                     <span class="source-badge ${showVerifiedBadge ? 'verified' : ''}">
                         Source: ${popup.data.source} ${showVerifiedBadge ? '✓ VERIFIED' : ''}
                     </span>
-                    <div style="font-weight:800; font-size:0.9rem; margin-bottom:4px;">${popup.data.title}</div>
+                    <div style="font-family:'Press Start 2P', cursive; font-size:0.65rem; margin-bottom:6px; color:#fff;">${popup.data.title}</div>
                     <div class="popup-desc">${popup.data.desc}</div>
                     <div class="popup-actions">
                         <button class="action-btn btn-install" onclick="handleAction(${popup.id}, 'install')">INSTALL</button>
@@ -941,7 +888,7 @@
                     gameState.credits += 25;
                     gameState.patchesApplied++;
                     gameState.shield = Math.min(gameState.maxShield, gameState.shield + 15);
-                    addRebootCharge(20);
+                    addRebootCharge(25);
                 } else {
                     playSound('damage');
                     damageShield(25);
@@ -951,7 +898,7 @@
                     playSound('quarantine');
                     gameState.credits += 20;
                     gameState.threatsQuarantined++;
-                    addRebootCharge(10);
+                    addRebootCharge(15);
                 } else {
                     playSound('damage');
                     damageShield(10);
@@ -999,27 +946,21 @@
             gameState.rebootsCompleted++;
             gameState.shield = gameState.maxShield;
 
-            // Clear active popups
+            // Clear all current popups instantly
             gameState.popups.forEach(p => removePopupDOM(p.id));
             gameState.popups = [];
 
-            const overlay = document.getElementById('rebootOverlay');
-            const progress = document.getElementById('rebootProgress');
-            
-            overlay.classList.add('active');
-            progress.style.width = '0%';
+            updateHUD();
 
-            setTimeout(() => { progress.style.width = '100%'; }, 50);
+            // After 3rd reboot, simply make the screen go black and end
+            if (gameState.rebootsCompleted >= gameState.targetReboots) {
+                gameState.active = false;
+                clearInterval(timers.gameLoop);
+                clearInterval(timers.spawnLoop);
+                clearInterval(timers.tickerLoop);
 
-            setTimeout(() => {
-                overlay.classList.remove('active');
-                updateHUD();
-
-                // Check Victory Condition after 3rd Reboot
-                if (gameState.rebootsCompleted >= gameState.targetReboots) {
-                    triggerVictory();
-                }
-            }, 1800);
+                document.getElementById('blackScreen').classList.remove('hidden');
+            }
         }
 
         function buyUpgrade(type, cost) {
@@ -1045,18 +986,20 @@
             document.getElementById('shieldBar').style.width = `${(gameState.shield / gameState.maxShield) * 100}%`;
 
             const rebootBtn = document.getElementById('rebootBtn');
-            const rebootText = document.getElementById('rebootChargeText');
-            rebootText.innerText = `(${gameState.rebootCharge}%)`;
+            const gaugeFill = document.getElementById('rebootGaugeFill');
+            
+            gaugeFill.style.width = `${gameState.rebootCharge}%`;
 
             if (gameState.rebootCharge >= 100) {
                 rebootBtn.classList.add('ready');
                 rebootBtn.disabled = false;
+                rebootBtn.innerHTML = `⚡ EXECUTE REBOOT ⚡`;
             } else {
                 rebootBtn.classList.remove('ready');
                 rebootBtn.disabled = true;
+                rebootBtn.innerHTML = `🔄 REBOOT (${gameState.rebootCharge}%)`;
             }
 
-            // Upgrade button affordability check
             if (!gameState.upgrades.autoUpdate) document.getElementById('buyAutoUpdate').disabled = gameState.credits < 100;
             if (!gameState.upgrades.filter) document.getElementById('buyFilter').disabled = gameState.credits < 150;
             if (gameState.upgrades.timerExt === 0) document.getElementById('buyTimer').disabled = gameState.credits < 200;
@@ -1075,26 +1018,12 @@
             document.getElementById('gameOverModal').classList.remove('hidden');
         }
 
-        function triggerVictory() {
-            gameState.active = false;
-            clearInterval(timers.gameLoop);
-            clearInterval(timers.spawnLoop);
-            clearInterval(timers.tickerLoop);
-
-            playSound('victory');
-            document.getElementById('vicTime').innerText = `${gameState.timeElapsed}s`;
-            document.getElementById('vicPatches').innerText = gameState.patchesApplied;
-            document.getElementById('vicQuarantines').innerText = gameState.threatsQuarantined;
-            document.getElementById('victoryModal').classList.remove('hidden');
-        }
-
         function restartGame() {
             document.getElementById('gameOverModal').classList.add('hidden');
-            document.getElementById('victoryModal').classList.add('hidden');
+            document.getElementById('blackScreen').classList.add('hidden');
             startGame();
         }
 
-        // Spacebar Hotkey for Reboot
         window.addEventListener('keydown', (e) => {
             if (e.code === 'Space' && gameState.rebootCharge >= 100) {
                 e.preventDefault();
