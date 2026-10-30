@@ -1,0 +1,1838 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-black">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEON PHISH HUNTER: ORANGE CITY DEFENDER</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            overflow: hidden;
+            background-color: #050200;
+            color: #ffb870;
+        }
+        .font-orbitron { font-family: 'Orbitron', sans-serif; }
+        .font-mono-cyber { font-family: 'Share Tech Mono', monospace; }
+
+        /* Neon Glow Effects */
+        .neon-border-orange {
+            border: 2px solid #ff6600;
+            box-shadow: 0 0 15px rgba(255, 102, 0, 0.6), inset 0 0 10px rgba(255, 102, 0, 0.3);
+        }
+        .neon-border-red {
+            border: 2px solid #ff2200;
+            box-shadow: 0 0 15px rgba(255, 34, 0, 0.8), inset 0 0 10px rgba(255, 34, 0, 0.4);
+        }
+        .neon-border-cyan {
+            border: 2px solid #00e5ff;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.6), inset 0 0 10px rgba(0, 229, 255, 0.3);
+        }
+        .neon-text-orange {
+            color: #ff8800;
+            text-shadow: 0 0 8px #ff6600, 0 0 20px #ff3300;
+        }
+        .neon-text-cyan {
+            color: #00e5ff;
+            text-shadow: 0 0 8px #00e5ff, 0 0 15px #00aaff;
+        }
+        .neon-text-red {
+            color: #ff3333;
+            text-shadow: 0 0 8px #ff2200, 0 0 15px #990000;
+        }
+        .cyber-panel {
+            background: rgba(18, 9, 3, 0.88);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 120, 0, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(255, 102, 0, 0.08);
+        }
+        .cyber-button {
+            background: linear-gradient(135deg, rgba(255, 102, 0, 0.2) 0%, rgba(255, 51, 0, 0.4) 100%);
+            border: 1px solid #ff7700;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .cyber-button:hover {
+            background: linear-gradient(135deg, rgba(255, 136, 0, 0.4) 0%, rgba(255, 68, 0, 0.7) 100%);
+            box-shadow: 0 0 20px rgba(255, 102, 0, 0.8);
+            transform: translateY(-1px);
+        }
+        .cyber-button:active {
+            transform: translateY(1px);
+        }
+        /* Scanline Overlay */
+        .crt-scanlines {
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%, 
+                rgba(0, 0, 0, 0.35) 50%
+            ), linear-gradient(
+                90deg,
+                rgba(255, 100, 0, 0.03),
+                rgba(0, 255, 100, 0.01),
+                rgba(0, 100, 255, 0.03)
+            );
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(10, 5, 2, 0.8);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ff6600;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff8800;
+        }
+        
+        /* Red Flag Highlight Effects */
+        .flag-target {
+            cursor: pointer;
+            border-bottom: 2px dashed rgba(255, 150, 0, 0.5);
+            padding: 2px 4px;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+        .flag-target:hover {
+            background: rgba(255, 102, 0, 0.25);
+            border-bottom-color: #ff6600;
+        }
+        .flag-target.flagged-suspicious {
+            background: rgba(255, 34, 0, 0.35) !important;
+            border: 1px solid #ff2200 !important;
+            color: #ff9999 !important;
+            box-shadow: 0 0 10px rgba(255, 34, 0, 0.5);
+        }
+        .flag-target.flagged-safe {
+            background: rgba(0, 229, 255, 0.2) !important;
+            border: 1px solid #00e5ff !important;
+            color: #a6f6ff !important;
+        }
+        /* Pulse Animation */
+        @keyframes pulse-orange {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.03); }
+        }
+        .pulse-glow {
+            animation: pulse-orange 2s infinite;
+        }
+    </style>
+</head>
+<body class="h-full w-full relative flex flex-col justify-between overflow-hidden bg-black select-none">
+
+    <!-- CANVAS CONTAINER -->
+    <div id="canvasContainer" class="absolute inset-0 z-0">
+        <canvas id="gameCanvas" class="w-full h-full block"></canvas>
+    </div>
+
+    <!-- CRT EFFECT OVERLAY (TOGGLEABLE) -->
+    <div id="crtOverlay" class="crt-scanlines absolute inset-0 z-10 pointer-events-none transition-opacity duration-300"></div>
+
+    <!-- MAIN HUD TOP BAR -->
+    <header id="mainHUD" class="relative z-20 w-full p-2 md:p-4 flex flex-wrap justify-between items-center pointer-events-auto cyber-panel border-b border-orange-500/30">
+        <!-- Brand & Level -->
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-lg bg-orange-600/30 border border-orange-500 flex items-center justify-center text-orange-400 text-xl font-bold shadow-lg shadow-orange-900/50">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div>
+                <h1 class="font-orbitron font-extrabold text-lg md:text-xl text-orange-400 tracking-wider flex items-center gap-2">
+                    NEON PHISH HUNTER <span class="text-xs px-2 py-0.5 rounded bg-orange-900/80 border border-orange-500 text-orange-300">ORANGE CITY</span>
+                </h1>
+                <div class="text-xs font-mono-cyber text-orange-300/80 flex items-center space-x-3">
+                    <span id="currentModeLabel">MODE: CAMPAIGN</span>
+                    <span class="text-orange-600">|</span>
+                    <span id="levelNameDisplay" class="text-amber-400">STAGE 1: SPAM DISTRICT</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Firewall Health Bar -->
+        <div class="flex-1 max-w-xs md:max-w-md mx-2 my-1 md:my-0">
+            <div class="flex justify-between items-center text-xs font-mono-cyber mb-1">
+                <span class="text-orange-300 flex items-center gap-1"><i class="fa-solid fa-building-shield"></i> CITY FIREWALL SHIELD</span>
+                <span id="firewallPercent" class="text-orange-400 font-bold">100%</span>
+            </div>
+            <div class="w-full bg-stone-900 h-3 rounded-full border border-orange-900/60 p-0.5 overflow-hidden">
+                <div id="firewallBar" class="h-full bg-gradient-to-r from-orange-600 via-amber-500 to-orange-400 rounded-full transition-all duration-300 shadow-md shadow-orange-500/50" style="width: 100%;"></div>
+            </div>
+        </div>
+
+        <!-- Stats & Controls -->
+        <div class="flex items-center space-x-2 md:space-x-4">
+            <!-- Credits -->
+            <div class="bg-black/60 border border-amber-500/40 px-3 py-1 rounded-md text-right">
+                <div class="text-[10px] font-mono-cyber text-amber-500/80">CREDITS</div>
+                <div id="creditsDisplay" class="font-orbitron text-amber-400 font-bold text-sm md:text-base">💎 0</div>
+            </div>
+
+            <!-- PERFECTION STREAK HUD -->
+            <div class="bg-black/60 border border-orange-500/40 px-3 py-1 rounded-md text-center">
+                <div class="text-[10px] font-mono-cyber text-orange-400/80 tracking-wider">PERFECTION STREAK</div>
+                <div class="flex items-center justify-center space-x-1 mt-0.5">
+                    <div id="streakLamps" class="flex space-x-1">
+                        <!-- Rendered dynamically -->
+                    </div>
+                    <span id="streakText" class="font-orbitron text-amber-300 font-bold text-xs ml-1.5">0/8</span>
+                </div>
+            </div>
+
+            <!-- Score & Combo -->
+            <div class="bg-black/60 border border-orange-500/40 px-3 py-1 rounded-md text-right">
+                <div class="text-[10px] font-mono-cyber text-orange-400/80">SCORE / COMBO</div>
+                <div class="font-orbitron text-orange-400 font-bold text-sm md:text-base">
+                    <span id="scoreDisplay">0000</span> <span id="comboDisplay" class="text-xs text-amber-300 ml-1">x1</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <button id="btnShop" title="Cyber Upgrade Shop" class="cyber-button w-9 h-9 rounded-md text-orange-300 flex items-center justify-center">
+                <i class="fa-solid fa-store"></i>
+            </button>
+            <button id="btnCodex" title="Phishpedia Codex" class="cyber-button w-9 h-9 rounded-md text-orange-300 flex items-center justify-center">
+                <i class="fa-solid fa-book-bookmark"></i>
+            </button>
+            <button id="btnSound" title="Toggle Sound" class="cyber-button w-9 h-9 rounded-md text-orange-300 flex items-center justify-center">
+                <i id="soundIcon" class="fa-solid fa-volume-high"></i>
+            </button>
+            <button id="btnCRT" title="Toggle CRT Scanlines" class="cyber-button w-9 h-9 rounded-md text-orange-300 flex items-center justify-center">
+                <i class="fa-solid fa-tv"></i>
+            </button>
+            <button id="btnPause" title="Pause Game" class="cyber-button w-9 h-9 rounded-md text-orange-300 flex items-center justify-center">
+                <i id="pauseIcon" class="fa-solid fa-pause"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- IN-GAME CONTROLS HINT BANNER -->
+    <div id="controlsHint" class="relative z-20 self-center mt-2 px-4 py-1.5 rounded-full bg-orange-950/80 border border-orange-500/40 text-orange-300 text-xs font-mono-cyber flex items-center space-x-3 pointer-events-none transition-opacity duration-500">
+        <span><i class="fa-solid fa-crosshair text-amber-400"></i> AIM WITH MOUSE/TOUCH</span>
+        <span class="text-orange-600">|</span>
+        <span><i class="fa-solid fa-hand-pointer text-amber-400"></i> CLICK/TAP TO CAST BEAM LINE</span>
+        <span class="text-orange-600">|</span>
+        <span><i class="fa-solid fa-bolt text-amber-400"></i> HOOK DATA PODS TO INSPECT</span>
+    </div>
+
+    <div class="flex-1"></div>
+
+    <!-- MAIN START / LEVEL SELECTION MENU MODAL -->
+    <div id="menuModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
+        <div class="max-w-2xl w-full cyber-panel neon-border-orange rounded-xl p-6 md:p-8 flex flex-col space-y-6 relative overflow-hidden">
+            <div class="text-center space-y-2">
+                <div class="inline-block px-3 py-1 rounded-full bg-orange-500/20 border border-orange-500 text-orange-400 text-xs font-mono-cyber tracking-widest uppercase">
+                    CYBER DEFENSE SYSTEM v2.6
+                </div>
+                <h1 class="font-orbitron font-black text-3xl md:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500 tracking-wider">
+                    NEON PHISH HUNTER
+                </h1>
+                <p class="text-orange-200/80 text-sm md:text-base max-w-lg mx-auto">
+                    The Orange Cyber City is under heavy phishing payload assault. Deploy your digital angling beam, capture incoming data pods, inspect header red flags, and safeguard the city grid!
+                </p>
+            </div>
+
+            <!-- Game Mode Options -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Campaign Mode -->
+                <button id="btnStartCampaign" class="cyber-button p-5 rounded-lg text-left flex flex-col justify-between border-2 border-orange-500/60 group">
+                    <div class="flex justify-between items-center">
+                        <span class="font-orbitron font-bold text-lg text-orange-300 group-hover:text-amber-300"><i class="fa-solid fa-map"></i> MISSION CAMPAIGN</span>
+                        <span class="text-xs bg-orange-600/40 text-orange-200 px-2 py-0.5 rounded border border-orange-400">4 STAGES</span>
+                    </div>
+                    <p class="text-xs text-orange-200/70 mt-2">
+                        Progressive cyber security threats from beginner spam to state-sponsored spear phishing attacks.
+                    </p>
+                </button>
+
+                <!-- Endless Patrol -->
+                <button id="btnStartEndless" class="cyber-button p-5 rounded-lg text-left flex flex-col justify-between border-2 border-amber-500/60 group">
+                    <div class="flex justify-between items-center">
+                        <span class="font-orbitron font-bold text-lg text-amber-300 group-hover:text-yellow-300"><i class="fa-solid fa-infinity"></i> ENDLESS PATROL</span>
+                        <span class="text-xs bg-amber-600/40 text-amber-200 px-2 py-0.5 rounded border border-amber-400">HIGH SCORE</span>
+                    </div>
+                    <p class="text-xs text-amber-200/70 mt-2">
+                        Fast-paced endless stream of random legitimate and phishing emails with ramping speed.
+                    </p>
+                </button>
+            </div>
+
+            <!-- Campaign Stage Picker (Visible when campaign selected or expanding) -->
+            <div id="stagePicker" class="space-y-2 border-t border-orange-500/30 pt-4">
+                <div class="text-xs font-mono-cyber text-orange-400 uppercase tracking-widest mb-2 flex justify-between">
+                    <span>SELECT CAMPAIGN MISSION:</span>
+                    <span id="highScoreText" class="text-amber-400">BEST SCORE: 0</span>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <button class="stage-btn active cyber-button p-2 text-center rounded border border-orange-500 text-xs font-bold" data-stage="1">
+                        <div class="text-amber-400 font-orbitron">STAGE 1</div>
+                        <div class="text-[10px] text-orange-200/80">Spam & Phish</div>
+                    </button>
+                    <button class="stage-btn cyber-button p-2 text-center rounded border border-orange-900 text-xs font-bold" data-stage="2">
+                        <div class="text-amber-400 font-orbitron">STAGE 2</div>
+                        <div class="text-[10px] text-orange-200/80">Spoofing & Homographs</div>
+                    </button>
+                    <button class="stage-btn cyber-button p-2 text-center rounded border border-orange-900 text-xs font-bold" data-stage="3">
+                        <div class="text-amber-400 font-orbitron">STAGE 3</div>
+                        <div class="text-[10px] text-orange-200/80">Spear Phish & CEO Fraud</div>
+                    </button>
+                    <button class="stage-btn cyber-button p-2 text-center rounded border border-orange-900 text-xs font-bold" data-stage="4">
+                        <div class="text-amber-400 font-orbitron">STAGE 4</div>
+                        <div class="text-[10px] text-orange-200/80">Advanced Syndicate</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Launch Button -->
+            <button id="btnLaunchGame" class="w-full py-4 rounded-lg bg-gradient-to-r from-orange-600 via-amber-500 to-orange-600 text-black font-orbitron font-black text-xl tracking-widest hover:brightness-125 transition-all shadow-lg shadow-orange-600/50">
+                <i class="fa-solid fa-play mr-2"></i> LAUNCH CYBER BEAM DEFENSE
+            </button>
+        </div>
+    </div>
+
+    <!-- INTERACTIVE EMAIL INSPECTOR HUD MODAL -->
+    <div id="inspectorModal" class="fixed inset-0 z-40 hidden flex items-center justify-center bg-black/80 backdrop-blur-md p-3 md:p-6">
+        <div class="max-w-3xl w-full cyber-panel neon-border-orange rounded-xl flex flex-col max-h-[90vh] overflow-hidden shadow-2xl">
+            <!-- Header Window Bar -->
+            <div class="bg-gradient-to-r from-orange-950 via-amber-950 to-orange-950 px-4 py-3 border-b border-orange-500/40 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                    <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
+                    <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+                    <span class="font-orbitron font-bold text-sm text-orange-300 ml-2"><i class="fa-solid fa-envelope-open-text text-amber-400 mr-2"></i> INSPECTOR HUD TERMINAL v4.1</span>
+                </div>
+                <div class="text-xs font-mono-cyber text-amber-400 bg-amber-950/80 px-2 py-1 rounded border border-amber-600/50 flex items-center gap-1">
+                    <i class="fa-solid fa-magnifying-glass"></i> CLICK SUSPICIOUS ELEMENTS TO FLAG
+                </div>
+            </div>
+
+            <!-- Email Body Content (Scrollable) -->
+            <div class="p-4 md:p-6 overflow-y-auto space-y-4 font-mono-cyber text-sm bg-stone-950/90 text-orange-100 flex-1">
+                
+                <!-- Email Envelope / Metadata Table -->
+                <div class="bg-black/80 border border-orange-900/60 rounded-lg p-3 space-y-2">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-orange-900/40 pb-2">
+                        <span class="text-orange-400 font-bold text-xs uppercase">SENDER / FROM:</span>
+                        <div id="emailFrom" class="text-amber-200">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                    <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-orange-900/40 pb-2">
+                        <span class="text-orange-400 font-bold text-xs uppercase">RECIPIENT / TO:</span>
+                        <span class="text-stone-300">you@orangecity-defense.net</span>
+                    </div>
+                    <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-orange-900/40 pb-2">
+                        <span class="text-orange-400 font-bold text-xs uppercase">SUBJECT LINE:</span>
+                        <div id="emailSubject" class="text-amber-300 font-semibold">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                    <div class="flex flex-col md:flex-row md:items-center justify-between">
+                        <span class="text-orange-400 font-bold text-xs uppercase">SECURITY CERTIFICATE:</span>
+                        <div id="emailSecurity" class="text-xs">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email Message Content Frame -->
+                <div id="emailBodyContainer" class="bg-stone-900/90 border border-orange-900/50 rounded-lg p-4 leading-relaxed text-stone-200 space-y-3">
+                    <!-- Populated dynamically -->
+                </div>
+
+                <!-- Email Attachment Section -->
+                <div id="attachmentContainer" class="hidden bg-stone-900/80 border border-amber-600/40 rounded-lg p-3">
+                    <div class="text-xs text-amber-400 font-bold mb-1 flex items-center gap-1">
+                        <i class="fa-solid fa-paperclip"></i> ENCLOSED FILE ATTACHMENT:
+                    </div>
+                    <div id="attachmentSlot">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Red Flag Feedback Box -->
+                <div id="redFlagAnalysisBox" class="hidden bg-orange-950/70 border border-orange-500 rounded-lg p-3 text-xs text-orange-200 space-y-1">
+                    <div class="font-bold text-orange-400 flex items-center gap-1">
+                        <i class="fa-solid fa-microchip"></i> AI DEEP SCANNER ANALYSIS:
+                    </div>
+                    <div id="redFlagFeedbackList" class="list-disc pl-4 space-y-1">
+                        <!-- Populated as flags are clicked -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Decision Footer -->
+            <div class="bg-black/90 p-4 border-t border-orange-500/30 flex flex-col md:flex-row gap-3 justify-between items-center">
+                <div class="text-xs text-orange-300/80 flex items-center gap-2">
+                    <span class="inline-block w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+                    VERIFY HEADER & LINKS BEFORE DECISION
+                </div>
+                <div class="flex w-full md:w-auto gap-3">
+                    <!-- REPORT / QUARANTINE (RED) -->
+                    <button id="btnQuarantine" class="flex-1 md:flex-initial px-5 py-2.5 rounded-lg bg-red-950 border-2 border-red-500 text-red-200 font-orbitron font-bold text-sm hover:bg-red-900 hover:text-white transition shadow-lg shadow-red-950">
+                        <i class="fa-solid fa-triangle-exclamation mr-1"></i> QUARANTINE / REPORT PHISH
+                    </button>
+                    <!-- ALLOW / DELIVER (GREEN/CYAN) -->
+                    <button id="btnDeliver" class="flex-1 md:flex-initial px-5 py-2.5 rounded-lg bg-cyan-950 border-2 border-cyan-500 text-cyan-200 font-orbitron font-bold text-sm hover:bg-cyan-900 hover:text-white transition shadow-lg shadow-cyan-950">
+                        <i class="fa-solid fa-circle-check mr-1"></i> DELIVER / ALLOW MAIL
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DETAILED EDUCATIONAL EXPLANATION BREAKDOWN MODAL -->
+    <div id="explanationModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
+        <div class="max-w-2xl w-full cyber-panel neon-border-orange rounded-xl p-6 flex flex-col space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl">
+            <!-- Header Banner -->
+            <div id="expHeaderBanner" class="p-3.5 rounded-lg flex items-center justify-between font-orbitron font-bold text-base border">
+                <!-- Populated dynamically: e.g., CORRECT! +1 STREAK -->
+            </div>
+
+            <!-- Verdict Badge & Email Title -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-orange-500/30 pb-3 gap-2">
+                <div>
+                    <span class="text-[10px] font-mono-cyber text-orange-400/80 uppercase">ANALYZED SUBJECT:</span>
+                    <div id="expEmailSubject" class="font-orbitron font-bold text-sm text-orange-200">...</div>
+                </div>
+                <div id="expVerdictBadge">
+                    <!-- Populated dynamically: IS PHISHING or IS SAFE -->
+                </div>
+            </div>
+
+            <!-- Detailed Educational Breakdown -->
+            <div class="bg-stone-950/90 border border-orange-900/80 p-4 rounded-lg space-y-3 font-mono-cyber text-xs leading-relaxed text-orange-100">
+                <div class="text-amber-400 font-bold flex items-center gap-2 text-sm border-b border-orange-900/60 pb-2">
+                    <i class="fa-solid fa-graduation-cap text-base"></i> CYBER SECURITY ANALYSIS & BREAKDOWN:
+                </div>
+                <div id="expDetailedContent" class="space-y-2">
+                    <!-- Bullet points detailing why it is or is not phishing -->
+                </div>
+            </div>
+
+            <!-- Continue Button -->
+            <button id="btnContinueHunt" class="w-full py-3.5 rounded-lg bg-gradient-to-r from-orange-600 via-amber-500 to-orange-600 text-black font-orbitron font-black text-base tracking-widest hover:brightness-125 transition shadow-lg shadow-orange-600/50">
+                CONTINUE HUNT <i class="fa-solid fa-arrow-right ml-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- CYBER UPGRADE SHOP MODAL -->
+    <div id="shopModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+        <div class="max-w-2xl w-full cyber-panel neon-border-orange rounded-xl p-6 flex flex-col space-y-4">
+            <div class="flex justify-between items-center border-b border-orange-500/30 pb-3">
+                <h2 class="font-orbitron font-bold text-xl text-amber-400 flex items-center gap-2">
+                    <i class="fa-solid fa-store"></i> CYBER TECH UPGRADE SHOP
+                </h2>
+                <button id="btnCloseShop" class="text-orange-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+                <!-- Shop Item 1: AI Scanner -->
+                <div class="bg-black/60 border border-orange-900/80 p-3 rounded-lg flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded bg-orange-950 border border-orange-500 flex items-center justify-center text-orange-400 text-lg">
+                            <i class="fa-solid fa-eye"></i>
+                        </div>
+                        <div>
+                            <div class="font-orbitron text-sm font-bold text-orange-300">AI DEEP SCANNER</div>
+                            <div class="text-xs text-orange-200/70">Auto-highlights 1 Red Flag in the email inspector.</div>
+                        </div>
+                    </div>
+                    <button id="buyAIScanner" class="cyber-button px-3 py-1.5 rounded text-xs font-bold text-amber-300 whitespace-nowrap">
+                        BUY 150 💎
+                    </button>
+                </div>
+
+                <!-- Shop Item 2: EMP Blast -->
+                <div class="bg-black/60 border border-orange-900/80 p-3 rounded-lg flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded bg-orange-950 border border-orange-500 flex items-center justify-center text-amber-400 text-lg">
+                            <i class="fa-solid fa-bolt"></i>
+                        </div>
+                        <div>
+                            <div class="font-orbitron text-sm font-bold text-amber-300">EMP STREAM STUNNER</div>
+                            <div class="text-xs text-orange-200/70">Slows down all floating pods in data stream by 50%.</div>
+                        </div>
+                    </div>
+                    <button id="buyEMP" class="cyber-button px-3 py-1.5 rounded text-xs font-bold text-amber-300 whitespace-nowrap">
+                        BUY 200 💎
+                    </button>
+                </div>
+
+                <!-- Shop Item 3: Reel Speed -->
+                <div class="bg-black/60 border border-orange-900/80 p-3 rounded-lg flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded bg-orange-950 border border-orange-500 flex items-center justify-center text-cyan-400 text-lg">
+                            <i class="fa-solid fa-gauge-high"></i>
+                        </div>
+                        <div>
+                            <div class="font-orbitron text-sm font-bold text-cyan-300">QUANTUM REEL BEAM</div>
+                            <div class="text-xs text-orange-200/70">Instantly hooks and reels data pods up to terminal.</div>
+                        </div>
+                    </div>
+                    <button id="buyReelSpeed" class="cyber-button px-3 py-1.5 rounded text-xs font-bold text-amber-300 whitespace-nowrap">
+                        BUY 100 💎
+                    </button>
+                </div>
+
+                <!-- Shop Item 4: City Shield Repair -->
+                <div class="bg-black/60 border border-orange-900/80 p-3 rounded-lg flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded bg-orange-950 border border-orange-500 flex items-center justify-center text-emerald-400 text-lg">
+                            <i class="fa-solid fa-heart-pulse"></i>
+                        </div>
+                        <div>
+                            <div class="font-orbitron text-sm font-bold text-emerald-300">CITY FIREWALL REPAIR</div>
+                            <div class="text-xs text-orange-200/70">Restores +40 Firewall Shield integrity to Orange City.</div>
+                        </div>
+                    </div>
+                    <button id="buyShieldRepair" class="cyber-button px-3 py-1.5 rounded text-xs font-bold text-amber-300 whitespace-nowrap">
+                        BUY 120 💎
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PHISHPEDIA FIELD CODEX MODAL -->
+    <div id="codexModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+        <div class="max-w-3xl w-full cyber-panel neon-border-orange rounded-xl p-6 flex flex-col space-y-4 max-h-[85vh]">
+            <div class="flex justify-between items-center border-b border-orange-500/30 pb-3">
+                <h2 class="font-orbitron font-bold text-xl text-amber-400 flex items-center gap-2">
+                    <i class="fa-solid fa-book-bookmark"></i> PHISHPEDIA FIELD CODEX
+                </h2>
+                <button id="btnCloseCodex" class="text-orange-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 overflow-y-auto flex-1 pr-1 font-mono-cyber">
+                <!-- Nav sidebar -->
+                <div class="space-y-1">
+                    <button class="codex-nav-btn active w-full text-left px-3 py-2 rounded bg-orange-900/50 border border-orange-500 text-xs text-amber-300 font-bold" data-topic="typosquat">
+                        1. Typosquatting & Homographs
+                    </button>
+                    <button class="codex-nav-btn w-full text-left px-3 py-2 rounded bg-black/50 border border-orange-900 text-xs text-orange-300" data-topic="spear">
+                        2. Spear Phishing & CEO Scams
+                    </button>
+                    <button class="codex-nav-btn w-full text-left px-3 py-2 rounded bg-black/50 border border-orange-900 text-xs text-orange-300" data-topic="urgency">
+                        3. Urgency & Panic Tactics
+                    </button>
+                    <button class="codex-nav-btn w-full text-left px-3 py-2 rounded bg-black/50 border border-orange-900 text-xs text-orange-300" data-topic="attachments">
+                        4. Malicious Executables
+                    </button>
+                    <button class="codex-nav-btn w-full text-left px-3 py-2 rounded bg-black/50 border border-orange-900 text-xs text-orange-300" data-topic="rawip">
+                        5. Raw IP & Link Redirection
+                    </button>
+                </div>
+
+                <!-- Codex Detail Content Pane -->
+                <div id="codexDetailPane" class="col-span-2 bg-stone-950/90 border border-orange-900/80 p-4 rounded-lg text-xs leading-relaxed space-y-3 text-orange-100 overflow-y-auto">
+                    <!-- Rendered dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MISSION COMPLETE / GAME OVER SUMMARY MODAL -->
+    <div id="summaryModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/85 backdrop-blur-md p-4">
+        <div class="max-w-md w-full cyber-panel neon-border-orange rounded-xl p-6 text-center space-y-4">
+            <div id="summaryIcon" class="text-5xl text-amber-400">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <h2 id="summaryTitle" class="font-orbitron font-black text-2xl text-orange-400 tracking-wider">
+                MISSION ACCOMPLISHED
+            </h2>
+            <p id="summaryDesc" class="text-xs font-mono-cyber text-orange-200/80">
+                You successfully defended Orange City skyline against phishing cyber threats!
+            </p>
+
+            <div class="bg-black/60 border border-orange-900/80 rounded-lg p-3 space-y-2 font-mono-cyber text-xs">
+                <div class="flex justify-between">
+                    <span class="text-orange-400">TOTAL SCORE:</span>
+                    <span id="summaryScore" class="font-bold text-amber-300">0</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-orange-400">PHISH NEUTRALIZED:</span>
+                    <span id="summaryPhishCount" class="font-bold text-emerald-400">0</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-orange-400">ACCURACY RATE:</span>
+                    <span id="summaryAccuracy" class="font-bold text-cyan-400">100%</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-orange-400">CREDITS EARNED:</span>
+                    <span id="summaryCredits" class="font-bold text-amber-400">+0 💎</span>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <button id="btnRetryMission" class="flex-1 cyber-button py-2.5 rounded text-xs font-orbitron font-bold text-orange-300">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> RESTART
+                </button>
+                <button id="btnMenuReturn" class="flex-1 py-2.5 rounded bg-orange-600 hover:bg-orange-500 text-black font-orbitron font-bold text-xs">
+                    <i class="fa-solid fa-house mr-1"></i> MENU
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT GAME ENGINE -->
+    <script>
+        /**
+         * NEON PHISH HUNTER: ORANGE CITY DEFENDER
+         * Expanded Educational Cyberpunk Game Engine
+         */
+
+        // --- GAME AUDIO SYNTHESIZER (Web Audio API) ---
+        class CyberAudioSynth {
+            constructor() {
+                this.ctx = null;
+                this.muted = false;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                }
+            }
+
+            playBeamCast() {
+                if (this.muted || !this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(150, this.ctx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.15);
+                } catch(e){}
+            }
+
+            playReelClick() {
+                if (this.muted || !this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(1200, this.ctx.currentTime);
+                    gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.04);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.04);
+                } catch(e){}
+            }
+
+            playSuccessJingle() {
+                if (this.muted || !this.ctx) return;
+                try {
+                    const now = this.ctx.currentTime;
+                    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                    notes.forEach((freq, idx) => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+                        gain.gain.setValueAtTime(0.15, now + idx * 0.08);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.2);
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start(now + idx * 0.08);
+                        osc.stop(now + idx * 0.08 + 0.2);
+                    });
+                } catch(e){}
+            }
+
+            playPhishAlert() {
+                if (this.muted || !this.ctx) return;
+                try {
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(180, now);
+                    osc.frequency.setValueAtTime(90, now + 0.12);
+                    gain.gain.setValueAtTime(0.28, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                } catch(e){}
+            }
+
+            playVictoryFanfare() {
+                if (this.muted || !this.ctx) return;
+                try {
+                    const now = this.ctx.currentTime;
+                    const arpeggiated = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
+                    arpeggiated.forEach((freq, idx) => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, now + idx * 0.1);
+                        gain.gain.setValueAtTime(0.2, now + idx * 0.1);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.35);
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start(now + idx * 0.1);
+                        osc.stop(now + idx * 0.1 + 0.35);
+                    });
+                } catch(e){}
+            }
+
+            toggleMute() {
+                this.muted = !this.muted;
+                return this.muted;
+            }
+        }
+
+        const audioSynth = new CyberAudioSynth();
+
+        // --- EXPANDED 12-SCENARIO DATABASE ---
+        const EMAIL_DATABASE = [
+            // 1. CEO Gift Card Scam (Phish)
+            {
+                id: 'sp_ceo_giftcard',
+                stage: 1,
+                isPhish: true,
+                subject: 'CONFIDENTIAL: Urgent Purchase of Gift Cards for Partner Summit',
+                fromName: 'Chief Executive Officer',
+                fromAddr: 'ceo-desk@executive-mail-portal.org',
+                cert: 'UNVERIFIED SENDER',
+                body: `Hey Defender,<br><br>I am currently locked in an emergency executive board meeting and cannot take calls. I need you to purchase 10x $100 Cyber Gift Cards immediately for our summit partners.<br><br><span class="flag-target" data-flag="ceofraud">Send the codes directly to my personal line as soon as possible. Do not mention this to accounting yet.</span>`,
+                attachment: null,
+                redFlags: [
+                    { id: 'fromAddr', text: 'Domain Mismatch: External address @executive-mail-portal.org impersonates CEO' },
+                    { id: 'ceofraud', text: 'CEO Fraud / Spear Phishing: Requests untraceable gift cards under secret urgency' }
+                ],
+                safeReasons: []
+            },
+            // 2. Spoofed HR Password Reset (Phish)
+            {
+                id: 'sp_hr_spoof',
+                stage: 1,
+                isPhish: true,
+                subject: 'ACTION REQUIRED: Mandatory HR Employee Portal Password Update',
+                fromName: 'Human Resources Desk',
+                fromAddr: 'hr-update@orangecity-defense.net.scam-server.info',
+                cert: 'SPOOFED SUBDOMAIN',
+                body: `Attention Employee,<br><br>Due to an annual security compliance audit, all staff must re-authenticate their login credentials.<br><br><span class="flag-target" data-flag="urgency">▶ Failure to verify within 2 hours will suspend your access portal!</span><br><br><span class="flag-target" data-flag="subdomain">Link: http://login.orangecity-defense.net.scam-server.info/hr/login</span>`,
+                attachment: null,
+                redFlags: [
+                    { id: 'subdomain', text: 'Subdomain Trickery: Real host domain is malicious scam-server.info' },
+                    { id: 'urgency', text: 'Artificial Panic: Threatens account lockup within 2 hours' }
+                ],
+                safeReasons: []
+            },
+            // 3. Urgent Bank Verification with IP Link (Phish)
+            {
+                id: 'sp_bank_ip',
+                stage: 2,
+                isPhish: true,
+                subject: 'URGENT: CyberBank Account Frozen Due to Anomalous Activity',
+                fromName: 'Orange CyberBank',
+                fromAddr: 'alert-service@orangebank-security.xyz',
+                cert: 'INVALID / UNTRUSTED CA',
+                body: `Dear Account Holder,<br><br>An unauthorized login attempt was detected from foreign IP 185.220.101.4.<br><br><span class="flag-target" data-flag="rawip">Click here to unfreeze account via raw server: http://192.168.1.88/bank/login</span>`,
+                attachment: null,
+                redFlags: [
+                    { id: 'fromAddr', text: 'Untrusted TLD: Uses .xyz domain instead of official bank domain' },
+                    { id: 'rawip', text: 'Raw Numeric IP URL: Unencrypted HTTP link pointing to a numeric IP address' }
+                ],
+                safeReasons: []
+            },
+            // 4. Suspicious Package Tracking with .scr attachment (Phish)
+            {
+                id: 'sp_package_scr',
+                stage: 2,
+                isPhish: true,
+                subject: 'Delivery Failed: Express Parcel #PX-99201 Pending Confirmation',
+                fromName: 'Global Cargo Express',
+                fromAddr: 'no-reply@cargo-express-logistics.biz',
+                cert: 'EXPIRED CERTIFICATE',
+                body: `Your parcel delivery could not be completed due to an incomplete street address.<br><br>Please open the enclosed shipping confirmation document to review parcel details and reschedule delivery.`,
+                attachment: { name: 'Delivery_Label_PX99201.pdf.scr', safe: false },
+                redFlags: [
+                    { id: 'attachment', text: 'Malicious Extension: Disguised as a PDF but carries an executable .scr script' }
+                ],
+                safeReasons: []
+            },
+            // 5. Fake IT Helpdesk Ticket (Phish)
+            {
+                id: 'sp_it_helpdesk',
+                stage: 3,
+                isPhish: true,
+                subject: 'IT HELPDESK TICKET #4092: Critical Security Patch Installation',
+                fromName: 'IT Support Desk',
+                fromAddr: 'admin-support@helpdesk-tech-update.com',
+                cert: 'UNVERIFIED EXTERNAL DOMAIN',
+                body: `Hello Defender,<br><br>A critical vulnerability hotfix has been issued for all city defense workstations.<br><br>Please download and execute the attached security agent installer immediately.`,
+                attachment: { name: 'CyberShield_Patch_v2.exe', safe: false },
+                redFlags: [
+                    { id: 'fromAddr', text: 'External Domain: External domain helpdesk-tech-update.com pretends to be internal IT' },
+                    { id: 'attachment', text: 'Executable Payload: High-risk .exe attachment asking for direct execution' }
+                ],
+                safeReasons: []
+            },
+            // 6. Fake Invoice with Double Extension (Phish)
+            {
+                id: 'sp_invoice_double_ext',
+                stage: 3,
+                isPhish: true,
+                subject: 'Overdue Invoice #INV-8842 - Immediate Payment Required',
+                fromName: 'Accounts Receivable',
+                fromAddr: 'billing@vendor-supplies-inc.com',
+                cert: 'SELF-SIGNED CERTIFICATE',
+                body: `Please review the attached past due statement for last month's hover-freight hardware delivery.<br><br>Kindly remit wire transfer confirmation upon receipt.`,
+                attachment: { name: 'Invoice_INV8842.pdf.exe', safe: false },
+                redFlags: [
+                    { id: 'attachment', text: 'Double Extension: .pdf.exe hides executable malware behind a fake PDF name' }
+                ],
+                safeReasons: []
+            },
+            // 7. PayPal Homograph / Typosquatting (Phish)
+            {
+                id: 'sp_paypal_homograph',
+                stage: 4,
+                isPhish: true,
+                subject: 'PayPаl Security Alert: Unauthorized Login Detected',
+                fromName: 'PayPаl Security Desk', // Cyrillic 'а'
+                fromAddr: 'support@pаypal-verifications.com',
+                cert: 'EXPIRED CERTIFICATE',
+                body: `We detected an abnormal login from an unrecognized device.<br><br><span class="flag-target" data-flag="homograph">▶ Click here to confirm credentials on PayPаl Portal</span>`,
+                attachment: null,
+                redFlags: [
+                    { id: 'homograph', text: 'Homograph Attack: Uses Cyrillic "а" (U+0430) instead of Latin "a"' },
+                    { id: 'fromAddr', text: 'Typosquatting Domain: pаypal-verifications.com is a spoofed harvester' }
+                ],
+                safeReasons: []
+            },
+            // 8. Routine Monthly Newsletter (Legitimate)
+            {
+                id: 'leg_newsletter',
+                stage: 1,
+                isPhish: false,
+                subject: 'Orange City Tech Digest: October 2026 Monthly Highlights',
+                fromName: 'Tech Digest Editors',
+                fromAddr: 'newsletter@orangecity-defense.net',
+                cert: 'VALID TLS 1.3 ENCRYPTED',
+                body: `Greetings Defender,<br><br>Welcome to this month's issue of the Tech Digest! Highlights include energy grid efficiency metrics, defense team milestones, and upcoming cyber workshops.<br><br>Read full articles on your resident dashboard at https://orangecity-defense.net/digest.`,
+                attachment: null,
+                redFlags: [],
+                safeReasons: [
+                    'Sender domain (@orangecity-defense.net) perfectly matches the verified official organization domain.',
+                    'Includes a valid TLS 1.3 encrypted security certificate verified by trusted CAs.',
+                    'Standard routine tone with no high-pressure threats, password requests, or executable attachments.'
+                ]
+            },
+            // 9. Official System Maintenance Notice (Legitimate)
+            {
+                id: 'leg_it_maint',
+                stage: 1,
+                isPhish: false,
+                subject: 'Scheduled Maintenance: Core Network Grid Maintenance on Sunday 02:00 UTC',
+                fromName: 'IT Infrastructure Ops',
+                fromAddr: 'sysops@orangecity-defense.net',
+                cert: 'VALID TLS 1.3 ENCRYPTED',
+                body: `Hello Team,<br><br>Please be advised that core network switches will undergo routine firmware upgrades this Sunday between 02:00 and 04:00 UTC.<br><br>No action is required on your part. Expect brief latency dips during this maintenance window.`,
+                attachment: null,
+                redFlags: [],
+                safeReasons: [
+                    'Sent from official internal Ops address (sysops@orangecity-defense.net) passing SPF/DKIM checks.',
+                    'Purely informational notice; contains no password prompt links, payment demands, or executable attachments.'
+                ]
+            },
+            // 10. Genuine HR Benefits Open Enrollment (Legitimate)
+            {
+                id: 'leg_hr_benefits',
+                stage: 2,
+                isPhish: false,
+                subject: 'Annual Benefits Open Enrollment Period Open (Oct 15 - Nov 15)',
+                fromName: 'Human Resources Team',
+                fromAddr: 'hr@orangecity-defense.net',
+                cert: 'VALID TLS 1.3 ENCRYPTED',
+                body: `Dear Staff,<br><br>The annual open enrollment window for healthcare and wellness benefits is now open through November 15.<br><br>You can review your plan details anytime by visiting the internal portal at https://intranet.orangecity-defense.net/benefits.`,
+                attachment: null,
+                redFlags: [],
+                safeReasons: [
+                    'All links point directly to the authentic internal intranet domain (intranet.orangecity-defense.net).',
+                    'Provides a reasonable 1-month enrollment timeline with no panic or threat of immediate account lock.'
+                ]
+            },
+            // 11. Legitimate Purchase Receipt (Legitimate)
+            {
+                id: 'leg_store_receipt',
+                stage: 2,
+                isPhish: false,
+                subject: 'Receipt for Order #OC-7721 - Orange Hardware Direct',
+                fromName: 'Orange Hardware Direct',
+                fromAddr: 'orders@orangehardware.com',
+                cert: 'VALID TLS 1.3 ENCRYPTED',
+                body: `Thank you for your recent purchase! Here is your itemized receipt for Order #OC-7721.<br><br>Item: 2x Cyber High-Res Display Monitors<br>Total Paid: 340.00 Credits.<br><br>You can view full order status on your store profile.`,
+                attachment: { name: 'Order_Receipt_OC7721.pdf', safe: true },
+                redFlags: [],
+                safeReasons: [
+                    'Official order domain (@orangehardware.com) with valid SSL security credentials.',
+                    'Includes a clean single-extension PDF receipt (.pdf) without executable code or credential demands.'
+                ]
+            },
+            // 12. Real GitHub Security Advisory (Legitimate)
+            {
+                id: 'leg_github_advisory',
+                stage: 3,
+                isPhish: false,
+                subject: 'GitHub Security Advisory: Dependabot alert for repository',
+                fromName: 'GitHub Security',
+                fromAddr: 'notifications@github.com',
+                cert: 'VALID TLS 1.3 ENCRYPTED',
+                body: `Dependabot detected a low-severity vulnerability in one of your project dependencies.<br><br>You can view advisory details and automated pull requests directly on your GitHub repository page at https://github.com/`,
+                attachment: null,
+                redFlags: [],
+                safeReasons: [
+                    'Fully authenticated sender address (@github.com) matching official cryptographic headers.',
+                    'Links point exclusively to official HTTPS github.com pages with no external redirectors.'
+                ]
+            }
+        ];
+
+        // --- GAME ENGINE STATE & CANVAS ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            initCityGrid();
+        });
+
+        // Game State Variables
+        let gameState = 'MENU'; // MENU, PLAYING, INSPECTOR, EXPLANATION, PAUSED, GAMEOVER
+        let gameMode = 'CAMPAIGN'; // CAMPAIGN, ENDLESS
+        let currentStage = 1;
+
+        let firewallHP = 100;
+        let maxFirewallHP = 100;
+        let credits = 50;
+        let score = 0;
+        let combo = 1;
+        let streak = 0;
+        const targetStreak = 8;
+        let phishNeutralizedCount = 0;
+        let totalInspected = 0;
+
+        // Upgrades
+        let hasAIScanner = false;
+        let hasEMP = false;
+        let reelSpeedMultiplier = 1;
+
+        // Fireworks Particles Array
+        let fireworkParticles = [];
+
+        // Input Tracking
+        const mouse = { x: width / 2, y: height / 2, isDown: false };
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+        window.addEventListener('mousedown', (e) => {
+            if (e.target.tagName === 'CANVAS') {
+                mouse.isDown = true;
+                castCyberBeam();
+            }
+        });
+        window.addEventListener('mouseup', () => { mouse.isDown = false; });
+
+        // Touch support
+        window.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                mouse.x = e.touches[0].clientX;
+                mouse.y = e.touches[0].clientY;
+            }
+        });
+        window.addEventListener('touchstart', (e) => {
+            if (e.target.tagName === 'CANVAS' && e.touches.length > 0) {
+                mouse.x = e.touches[0].clientX;
+                mouse.y = e.touches[0].clientY;
+                castCyberBeam();
+            }
+        });
+
+        // --- CANVAS PARALLAX BACKGROUND & CITY GRAPHICS ---
+        let cityBuildings = [];
+        let neonSigns = [];
+        let hoverCars = [];
+        let rainParticles = [];
+        let dataPods = [];
+        let laserBeam = null;
+
+        class Building {
+            constructor(x, width, height, layer) {
+                this.x = x;
+                this.width = width;
+                this.height = height;
+                this.layer = layer;
+                this.windows = [];
+                const rows = Math.floor(height / 20);
+                const cols = Math.floor(width / 15);
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols; c++) {
+                        if (Math.random() > 0.4) {
+                            this.windows.push({ r, c, active: Math.random() > 0.3 });
+                        }
+                    }
+                }
+            }
+
+            draw() {
+                const bBottom = height;
+                const bTop = height - this.height;
+                
+                let grad = ctx.createLinearGradient(0, bTop, 0, bBottom);
+                if (this.layer === 1) {
+                    grad.addColorStop(0, '#120701');
+                    grad.addColorStop(1, '#050200');
+                } else if (this.layer === 2) {
+                    grad.addColorStop(0, '#220e02');
+                    grad.addColorStop(1, '#090400');
+                } else {
+                    grad.addColorStop(0, '#381602');
+                    grad.addColorStop(1, '#0e0500');
+                }
+                ctx.fillStyle = grad;
+                ctx.fillRect(this.x, bTop, this.width, this.height);
+
+                ctx.strokeStyle = this.layer === 3 ? '#ff6600' : '#883300';
+                ctx.lineWidth = this.layer === 3 ? 2 : 1;
+                ctx.beginPath();
+                ctx.moveTo(this.x, bTop);
+                ctx.lineTo(this.x + this.width, bTop);
+                ctx.stroke();
+
+                ctx.fillStyle = firewallHP < 30 ? '#ff2200' : '#ff9900';
+                this.windows.forEach(w => {
+                    if (w.active) {
+                        ctx.globalAlpha = Math.random() > 0.98 ? 0.3 : 0.8;
+                        ctx.fillRect(this.x + 4 + w.c * 12, bTop + 8 + w.r * 18, 6, 10);
+                    }
+                });
+                ctx.globalAlpha = 1.0;
+            }
+        }
+
+        class NeonSign {
+            constructor(x, y, text) {
+                this.x = x;
+                this.y = y;
+                this.text = text;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.font = 'bold 16px Orbitron';
+                ctx.shadowColor = firewallHP < 30 ? '#ff0000' : '#ff6600';
+                ctx.shadowBlur = 12;
+                ctx.fillStyle = firewallHP < 30 ? '#ff3333' : '#ffaa00';
+                ctx.fillText(this.text, this.x, this.y);
+                ctx.restore();
+            }
+        }
+
+        class HoverCar {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() < 0.5 ? -50 : width + 50;
+                this.y = height * 0.3 + Math.random() * (height * 0.4);
+                this.vx = (this.x < 0 ? 1 : -1) * (2 + Math.random() * 4);
+                this.color = Math.random() > 0.5 ? '#ff6600' : '#00e5ff';
+            }
+
+            update() {
+                this.x += this.vx;
+                if ((this.vx > 0 && this.x > width + 100) || (this.vx < 0 && this.x < -100)) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.fillStyle = this.color;
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = 10;
+                ctx.fillRect(this.x, this.y, 16, 4);
+                ctx.strokeStyle = this.color;
+                ctx.globalAlpha = 0.4;
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y + 2);
+                ctx.lineTo(this.x - this.vx * 8, this.y + 2);
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+
+        class CyberRain {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.length = 10 + Math.random() * 20;
+                this.speed = 12 + Math.random() * 10;
+            }
+
+            update() {
+                this.y += this.speed;
+                this.x -= 2;
+                if (this.y > height) {
+                    this.y = -20;
+                    this.x = Math.random() * width;
+                }
+            }
+
+            draw() {
+                ctx.strokeStyle = '#ff660022';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(this.x - 3, this.y + this.length);
+                ctx.stroke();
+            }
+        }
+
+        class FireworkParticle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 2 + Math.random() * 7;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed;
+                this.alpha = 1.0;
+                this.color = ['#ff6600', '#ffaa00', '#00e5ff', '#ff0055', '#33ff77'][Math.floor(Math.random() * 5)];
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.vy += 0.05; // gravity
+                this.alpha -= 0.015;
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, this.alpha);
+                ctx.fillStyle = this.color;
+                ctx.shadowColor = this.color;
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        // --- DATA POD FLOATING EMAIL NODES ---
+        class DataPod {
+            constructor(emailData) {
+                this.data = emailData;
+                this.radius = 24;
+                this.x = -40;
+                this.y = height * 0.25 + Math.random() * (height * 0.45);
+                this.vx = (1.2 + Math.random() * 1.5) * (hasEMP ? 0.5 : 1.0);
+                this.pulse = 0;
+                this.isHooked = false;
+            }
+
+            update() {
+                if (!this.isHooked) {
+                    this.x += this.vx;
+                    this.pulse += 0.05;
+                }
+            }
+
+            draw() {
+                ctx.save();
+                const glowColor = '#ff7700';
+
+                ctx.shadowColor = glowColor;
+                ctx.shadowBlur = 15;
+                ctx.fillStyle = 'rgba(20, 10, 5, 0.9)';
+                ctx.strokeStyle = glowColor;
+                ctx.lineWidth = 2;
+
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#ffaa00';
+                ctx.font = '14px FontAwesome';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('\uf0e0', this.x, this.y);
+
+                ctx.font = '10px Share Tech Mono';
+                ctx.fillStyle = '#ffb870';
+                ctx.fillText(this.data.subject.substring(0, 18) + '...', this.x, this.y + 36);
+
+                ctx.restore();
+            }
+        }
+
+        // --- HOLOGRAPHIC CYBER FISHING BEAM ---
+        class LaserBeam {
+            constructor(startX, startY, targetX, targetY) {
+                this.startX = startX;
+                this.startY = startY;
+                this.currX = startX;
+                this.currY = startY;
+                this.targetX = targetX;
+                this.targetY = targetY;
+                this.progress = 0;
+                this.state = 'EXTENDING';
+                this.hookedPod = null;
+            }
+
+            update() {
+                if (this.state === 'EXTENDING') {
+                    this.progress += 0.15 * reelSpeedMultiplier;
+                    this.currX = this.startX + (this.targetX - this.startX) * this.progress;
+                    this.currY = this.startY + (this.targetY - this.startY) * this.progress;
+
+                    for (let pod of dataPods) {
+                        if (!pod.isHooked) {
+                            let dist = Math.hypot(this.currX - pod.x, this.currY - pod.y);
+                            if (dist < pod.radius + 10) {
+                                this.hookedPod = pod;
+                                pod.isHooked = true;
+                                this.state = 'RETRACTING';
+                                audioSynth.playReelClick();
+                                break;
+                            }
+                        }
+                    }
+
+                    if (this.progress >= 1.0) {
+                        this.state = 'RETRACTING';
+                    }
+                } else if (this.state === 'RETRACTING') {
+                    this.progress -= 0.12 * reelSpeedMultiplier;
+                    this.currX = this.startX + (this.targetX - this.startX) * this.progress;
+                    this.currY = this.startY + (this.targetY - this.startY) * this.progress;
+
+                    if (this.hookedPod) {
+                        this.hookedPod.x = this.currX;
+                        this.hookedPod.y = this.currY;
+                    }
+
+                    if (this.progress <= 0) {
+                        this.state = 'DONE';
+                        if (this.hookedPod) {
+                            openEmailInspector(this.hookedPod.data);
+                            dataPods = dataPods.filter(p => p !== this.hookedPod);
+                        }
+                    }
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.strokeStyle = '#ff6600';
+                ctx.lineWidth = 3;
+                ctx.shadowColor = '#ff3300';
+                ctx.shadowBlur = 12;
+
+                ctx.beginPath();
+                ctx.moveTo(this.startX, this.startY);
+                ctx.lineTo(this.currX, this.currY);
+                ctx.stroke();
+
+                ctx.fillStyle = '#ffcc00';
+                ctx.beginPath();
+                ctx.arc(this.currX, this.currY, 6, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        // --- CITY INITIALIZATION ---
+        function initCityGrid() {
+            cityBuildings = [];
+            neonSigns = [];
+            hoverCars = [];
+            rainParticles = [];
+
+            for (let x = 0; x < width; x += 60) {
+                cityBuildings.push(new Building(x, 70 + Math.random() * 40, height * 0.6 + Math.random() * 150, 1));
+            }
+            for (let x = -20; x < width; x += 90) {
+                let h = height * 0.45 + Math.random() * 180;
+                cityBuildings.push(new Building(x, 90 + Math.random() * 50, h, 2));
+                if (Math.random() > 0.6) {
+                    neonSigns.push(new NeonSign(x + 15, height - h + 40, ['ORANGE NET', 'CYBER SEC', 'PHISH LABS', 'NEON-9'][Math.floor(Math.random() * 4)]));
+                }
+            }
+            for (let x = -40; x < width; x += 140) {
+                cityBuildings.push(new Building(x, 120 + Math.random() * 60, height * 0.3 + Math.random() * 120, 3));
+            }
+
+            for (let i = 0; i < 8; i++) hoverCars.push(new HoverCar());
+            for (let i = 0; i < 60; i++) rainParticles.push(new CyberRain());
+        }
+
+        initCityGrid();
+
+        function castCyberBeam() {
+            if (gameState !== 'PLAYING') return;
+            if (laserBeam && laserBeam.state !== 'DONE') return;
+
+            const originX = width - 120;
+            const originY = height - 100;
+
+            laserBeam = new LaserBeam(originX, originY, mouse.x, mouse.y);
+            audioSynth.playBeamCast();
+        }
+
+        let lastPodSpawnTime = 0;
+        function handlePodSpawning(timestamp) {
+            if (gameState !== 'PLAYING') return;
+
+            const spawnInterval = gameMode === 'ENDLESS' ? 3200 : 4200;
+            if (timestamp - lastPodSpawnTime > spawnInterval) {
+                lastPodSpawnTime = timestamp;
+
+                let filtered = EMAIL_DATABASE.filter(e => gameMode === 'ENDLESS' ? true : e.stage === currentStage);
+                if (filtered.length === 0) filtered = EMAIL_DATABASE;
+                const scenario = filtered[Math.floor(Math.random() * filtered.length)];
+
+                dataPods.push(new DataPod(scenario));
+            }
+
+            dataPods.forEach(pod => {
+                if (pod.x > width + 80 && !pod.isHooked) {
+                    if (pod.data.isPhish) {
+                        applyFirewallDamage(10, 'UNCHECKED PHISH BREACHED GRID!');
+                    }
+                }
+            });
+            dataPods = dataPods.filter(p => p.x <= width + 80 || p.isHooked);
+        }
+
+        // --- INSPECTOR HUD & RED FLAG LOGIC ---
+        let currentInspectedEmail = null;
+        let userFlaggedSet = new Set();
+
+        function openEmailInspector(email) {
+            gameState = 'INSPECTOR';
+            currentInspectedEmail = email;
+            userFlaggedSet.clear();
+
+            document.getElementById('emailFrom').innerHTML = `<span class="flag-target" data-flag="fromAddr">${email.fromName} &lt;${email.fromAddr}&gt;</span>`;
+            document.getElementById('emailSubject').innerHTML = `<span class="flag-target" data-flag="subject">${email.subject}</span>`;
+            document.getElementById('emailSecurity').innerHTML = `<span class="flag-target" data-flag="cert">${email.cert}</span>`;
+            document.getElementById('emailBodyContainer').innerHTML = email.body;
+
+            const attContainer = document.getElementById('attachmentContainer');
+            if (email.attachment) {
+                attContainer.classList.remove('hidden');
+                document.getElementById('attachmentSlot').innerHTML = `
+                    <div class="flag-target inline-flex items-center space-x-2 bg-black/60 px-3 py-1.5 rounded border border-orange-700 text-xs text-orange-200" data-flag="attachment">
+                        <i class="fa-solid fa-file-code text-amber-400"></i>
+                        <span>${email.attachment.name}</span>
+                    </div>
+                `;
+            } else {
+                attContainer.classList.add('hidden');
+            }
+
+            document.getElementById('redFlagAnalysisBox').classList.add('hidden');
+            document.getElementById('redFlagFeedbackList').innerHTML = '';
+
+            if (hasAIScanner && email.redFlags && email.redFlags.length > 0) {
+                const autoFlag = email.redFlags[0].id;
+                userFlaggedSet.add(autoFlag);
+                updateFlagUI();
+            }
+
+            document.getElementById('inspectorModal').classList.remove('hidden');
+
+            document.querySelectorAll('.flag-target').forEach(el => {
+                el.addEventListener('click', (evt) => {
+                    evt.stopPropagation();
+                    const flagType = el.getAttribute('data-flag');
+                    if (userFlaggedSet.has(flagType)) {
+                        userFlaggedSet.delete(flagType);
+                    } else {
+                        userFlaggedSet.add(flagType);
+                        audioSynth.playReelClick();
+                    }
+                    updateFlagUI();
+                });
+            });
+        }
+
+        function updateFlagUI() {
+            document.querySelectorAll('.flag-target').forEach(el => {
+                const flagType = el.getAttribute('data-flag');
+                if (userFlaggedSet.has(flagType)) {
+                    el.classList.add('flagged-suspicious');
+                } else {
+                    el.classList.remove('flagged-suspicious');
+                }
+            });
+
+            const analysisBox = document.getElementById('redFlagAnalysisBox');
+            const feedbackList = document.getElementById('redFlagFeedbackList');
+            
+            if (userFlaggedSet.size > 0) {
+                analysisBox.classList.remove('hidden');
+                feedbackList.innerHTML = '';
+                userFlaggedSet.forEach(flagId => {
+                    const matched = currentInspectedEmail.redFlags ? currentInspectedEmail.redFlags.find(rf => rf.id === flagId) : null;
+                    const li = document.createElement('li');
+                    if (matched) {
+                        li.className = 'text-red-400 font-bold';
+                        li.innerHTML = `🚩 <b>SUSPICIOUS:</b> ${matched.text}`;
+                    } else {
+                        li.className = 'text-amber-300';
+                        li.innerHTML = `⚠️ Flagged by User as potential anomaly.`;
+                    }
+                    feedbackList.appendChild(li);
+                });
+            } else {
+                analysisBox.classList.add('hidden');
+            }
+        }
+
+        document.getElementById('btnQuarantine').addEventListener('click', () => {
+            evaluateDecision(true);
+        });
+
+        document.getElementById('btnDeliver').addEventListener('click', () => {
+            evaluateDecision(false);
+        });
+
+        // --- EVALUATE DECISION & SHOW EDUCATIONAL BREAKDOWN ---
+        let lastDecisionIsCorrect = false;
+
+        function evaluateDecision(playerQuarantined) {
+            document.getElementById('inspectorModal').classList.add('hidden');
+            totalInspected++;
+
+            const actualIsPhish = currentInspectedEmail.isPhish;
+            lastDecisionIsCorrect = (playerQuarantined === actualIsPhish);
+
+            if (lastDecisionIsCorrect) {
+                // Correct Choice
+                audioSynth.playSuccessJingle();
+                combo++;
+                streak++;
+                let earnedScore = 150 * combo;
+                let earnedCredits = 30 + (userFlaggedSet.size * 10);
+
+                if (actualIsPhish) phishNeutralizedCount++;
+
+                score += earnedScore;
+                credits += earnedCredits;
+                firewallHP = Math.min(maxFirewallHP, firewallHP + 5);
+            } else {
+                // Wrong Choice
+                audioSynth.playPhishAlert();
+                combo = 1;
+                streak = 0; // RESET PERFECTION STREAK
+                applyFirewallDamage(25, actualIsPhish ? 'FALSE DELIVER: PHISHING INFILTRATED CITY!' : 'FALSE QUARANTINE: LEGITIMATE MAIL BLOCKED!');
+            }
+
+            updateHUDDisplay();
+            showExplanationModal(lastDecisionIsCorrect, actualIsPhish);
+        }
+
+        function showExplanationModal(isCorrect, isPhish) {
+            gameState = 'EXPLANATION';
+
+            const headerBanner = document.getElementById('expHeaderBanner');
+            const verdictBadge = document.getElementById('expVerdictBadge');
+            const detailedContent = document.getElementById('expDetailedContent');
+
+            document.getElementById('expEmailSubject').innerText = currentInspectedEmail.subject;
+
+            if (isCorrect) {
+                headerBanner.className = 'p-3.5 rounded-lg flex items-center justify-between font-orbitron font-bold text-sm bg-emerald-950/80 border border-emerald-500 text-emerald-300 shadow-lg shadow-emerald-950';
+                headerBanner.innerHTML = `
+                    <span class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i> DECISION CORRECT!</span>
+                    <span class="text-xs bg-emerald-900/60 px-2.5 py-1 rounded border border-emerald-500 text-emerald-200">PERFECTION STREAK: ${streak}/${targetStreak}</span>
+                `;
+            } else {
+                headerBanner.className = 'p-3.5 rounded-lg flex items-center justify-between font-orbitron font-bold text-sm bg-red-950/80 border border-red-500 text-red-300 shadow-lg shadow-red-950';
+                headerBanner.innerHTML = `
+                    <span class="flex items-center gap-2"><i class="fa-solid fa-triangle-exclamation text-red-400 text-lg"></i> INCORRECT DECISION!</span>
+                    <span class="text-xs bg-red-900/60 px-2.5 py-1 rounded border border-red-500 text-red-200">STREAK RESET TO 0</span>
+                `;
+            }
+
+            if (isPhish) {
+                verdictBadge.innerHTML = `<span class="px-3 py-1 rounded-full bg-red-900/80 border border-red-500 text-red-300 font-orbitron text-xs font-bold shadow-md shadow-red-900/50"><i class="fa-solid fa-bug mr-1"></i> VERDICT: IS PHISHING</span>`;
+                
+                let flagsHTML = '<ul class="space-y-2">';
+                currentInspectedEmail.redFlags.forEach(rf => {
+                    flagsHTML += `
+                        <li class="bg-red-950/40 border-l-2 border-red-500 p-2 rounded-r text-red-200 text-xs">
+                            <span class="font-bold text-red-400">🚩 RED FLAG DETECTED:</span> ${rf.text}
+                        </li>
+                    `;
+                });
+                flagsHTML += '</ul>';
+                detailedContent.innerHTML = flagsHTML;
+            } else {
+                verdictBadge.innerHTML = `<span class="px-3 py-1 rounded-full bg-cyan-900/80 border border-cyan-500 text-cyan-300 font-orbitron text-xs font-bold shadow-md shadow-cyan-900/50"><i class="fa-solid fa-shield-halved mr-1"></i> VERDICT: SAFE / LEGITIMATE</span>`;
+                
+                let safeHTML = '<ul class="space-y-2">';
+                currentInspectedEmail.safeReasons.forEach(sr => {
+                    safeHTML += `
+                        <li class="bg-cyan-950/40 border-l-2 border-cyan-500 p-2 rounded-r text-cyan-200 text-xs">
+                            <span class="font-bold text-cyan-400">✅ SAFE INDICATOR:</span> ${sr}
+                        </li>
+                    `;
+                });
+                safeHTML += '</ul>';
+                detailedContent.innerHTML = safeHTML;
+            }
+
+            document.getElementById('explanationModal').classList.remove('hidden');
+        }
+
+        // Continue Button Handler
+        document.getElementById('btnContinueHunt').addEventListener('click', () => {
+            document.getElementById('explanationModal').classList.add('hidden');
+            
+            // Check 8-in-a-row victory
+            if (streak >= targetStreak) {
+                triggerStreakVictory();
+            } else {
+                gameState = 'PLAYING';
+                checkStageProgress();
+            }
+        });
+
+        function triggerStreakVictory() {
+            gameState = 'GAMEOVER';
+            audioSynth.playVictoryFanfare();
+
+            // Spawn fireworks
+            for (let i = 0; i < 80; i++) {
+                fireworkParticles.push(new FireworkParticle(width * 0.3 + Math.random() * width * 0.4, height * 0.3 + Math.random() * height * 0.3));
+            }
+
+            credits += 250;
+            updateHUDDisplay();
+
+            document.getElementById('summaryModal').classList.remove('hidden');
+            document.getElementById('summaryIcon').innerHTML = `<i class="fa-solid fa-trophy text-amber-400 animate-bounce"></i>`;
+            document.getElementById('summaryTitle').innerText = '🔥 8-IN-A-ROW VICTORY! 🔥';
+            document.getElementById('summaryDesc').innerText = 'PERFECTION STREAK ACHIEVED! You successfully analyzed 8 consecutive emails without a single cybersecurity error!';
+
+            document.getElementById('summaryScore').innerText = score;
+            document.getElementById('summaryPhishCount').innerText = phishNeutralizedCount;
+            document.getElementById('summaryAccuracy').innerText = totalInspected > 0 ? `${Math.round((phishNeutralizedCount / totalInspected) * 100)}%` : '100%';
+            document.getElementById('summaryCredits').innerText = `+250 💎 PERFECTION BONUS`;
+        }
+
+        function applyFirewallDamage(amount, reason) {
+            firewallHP = Math.max(0, firewallHP - amount);
+            showToast(`⚠️ SHIELD DAMAGE: ${reason}`, 'error');
+            
+            document.getElementById('crtOverlay').classList.add('neon-border-red');
+            setTimeout(() => {
+                document.getElementById('crtOverlay').classList.remove('neon-border-red');
+            }, 600);
+
+            if (firewallHP <= 0) {
+                triggerGameOver(false);
+            }
+        }
+
+        function showToast(msg, type) {
+            const hint = document.getElementById('controlsHint');
+            hint.innerHTML = `<span class="${type === 'success' ? 'text-emerald-400 font-bold' : 'text-red-400 font-bold'}">${msg}</span>`;
+            setTimeout(() => {
+                hint.innerHTML = `<span><i class="fa-solid fa-crosshair text-amber-400"></i> AIM WITH MOUSE/TOUCH</span> <span class="text-orange-600">|</span> <span><i class="fa-solid fa-hand-pointer text-amber-400"></i> CLICK TO CAST BEAM</span>`;
+            }, 3200);
+        }
+
+        function updateHUDDisplay() {
+            document.getElementById('firewallBar').style.width = `${(firewallHP / maxFirewallHP) * 100}%`;
+            document.getElementById('firewallPercent').innerText = `${Math.round((firewallHP / maxFirewallHP) * 100)}%`;
+            document.getElementById('creditsDisplay').innerText = `💎 ${credits}`;
+            document.getElementById('scoreDisplay').innerText = score.toString().padStart(4, '0');
+            document.getElementById('comboDisplay').innerText = `x${combo}`;
+
+            // Update Streak Lamps
+            const lampsContainer = document.getElementById('streakLamps');
+            lampsContainer.innerHTML = '';
+            for (let i = 0; i < targetStreak; i++) {
+                const lamp = document.createElement('div');
+                if (i < streak) {
+                    lamp.className = 'w-2.5 h-3.5 rounded-sm bg-gradient-to-t from-orange-600 to-amber-400 border border-orange-300 shadow-md shadow-orange-500/80 animate-pulse';
+                } else {
+                    lamp.className = 'w-2.5 h-3.5 rounded-sm bg-stone-900 border border-stone-700/60';
+                }
+                lampsContainer.appendChild(lamp);
+            }
+            document.getElementById('streakText').innerText = `${streak}/${targetStreak}`;
+        }
+
+        function checkStageProgress() {
+            if (gameMode === 'CAMPAIGN' && phishNeutralizedCount >= currentStage * 3) {
+                if (currentStage < 4) {
+                    currentStage++;
+                    phishNeutralizedCount = 0;
+                    document.getElementById('levelNameDisplay').innerText = `STAGE ${currentStage}: ${['SPAM DISTRICT', 'SPOOFING & HOMOGRAPHS', 'CEO FRAUD & SPEAR', 'ADVANCED SYNDICATE'][currentStage - 1]}`;
+                    showToast(`🎉 STAGE COMPLETE! ADVANCING TO STAGE ${currentStage}`, 'success');
+                }
+            }
+        }
+
+        function triggerGameOver(isWin) {
+            gameState = 'GAMEOVER';
+            document.getElementById('summaryModal').classList.remove('hidden');
+            
+            const icon = document.getElementById('summaryIcon');
+            const title = document.getElementById('summaryTitle');
+            const desc = document.getElementById('summaryDesc');
+
+            if (isWin) {
+                icon.innerHTML = `<i class="fa-solid fa-trophy text-amber-400"></i>`;
+                title.innerText = 'ORANGE CITY DEFENDED!';
+                desc.innerText = 'Congratulations Hunter! You successfully secured all digital sectors against cyber threats.';
+            } else {
+                icon.innerHTML = `<i class="fa-solid fa-skull-crossbones text-red-500"></i>`;
+                title.innerText = 'FIREWALL BREACHED';
+                desc.innerText = 'City Firewall HP depleted. Critical phishing payloads infiltrated the city infrastructure.';
+            }
+
+            document.getElementById('summaryScore').innerText = score;
+            document.getElementById('summaryPhishCount').innerText = phishNeutralizedCount;
+            document.getElementById('summaryAccuracy').innerText = totalInspected > 0 ? `${Math.round((phishNeutralizedCount / totalInspected) * 100)}%` : '100%';
+            document.getElementById('summaryCredits').innerText = `+${credits} 💎`;
+        }
+
+        // --- RENDER MAIN LOOP ---
+        function renderLoop(timestamp) {
+            ctx.fillStyle = firewallHP < 30 ? '#120200' : '#050200';
+            ctx.fillRect(0, 0, width, height);
+
+            cityBuildings.forEach(b => b.draw());
+            neonSigns.forEach(s => s.draw());
+            hoverCars.forEach(c => { c.update(); c.draw(); });
+            rainParticles.forEach(r => { r.update(); r.draw(); });
+
+            // Defender Platform
+            ctx.save();
+            ctx.fillStyle = '#1c0c03';
+            ctx.strokeStyle = '#ff6600';
+            ctx.lineWidth = 2;
+            ctx.fillRect(width - 160, height - 120, 160, 120);
+            ctx.strokeRect(width - 160, height - 120, 160, 120);
+
+            ctx.fillStyle = '#ff8800';
+            ctx.shadowColor = '#ff6600';
+            ctx.shadowBlur = 15;
+            ctx.beginPath();
+            ctx.arc(width - 120, height - 100, 12, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            if (gameState === 'PLAYING' && (!laserBeam || laserBeam.state === 'DONE')) {
+                ctx.save();
+                ctx.strokeStyle = 'rgba(255, 102, 0, 0.3)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                ctx.moveTo(width - 120, height - 100);
+                ctx.lineTo(mouse.x, mouse.y);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            handlePodSpawning(timestamp);
+            dataPods.forEach(pod => { pod.update(); pod.draw(); });
+
+            if (laserBeam) {
+                laserBeam.update();
+                laserBeam.draw();
+            }
+
+            // Firework Particles Update
+            fireworkParticles.forEach(p => { p.update(); p.draw(); });
+            fireworkParticles = fireworkParticles.filter(p => p.alpha > 0);
+
+            requestAnimationFrame(renderLoop);
+        }
+
+        requestAnimationFrame(renderLoop);
+
+        // --- UI EVENT LISTENERS ---
+        document.getElementById('btnStartCampaign').addEventListener('click', () => {
+            gameMode = 'CAMPAIGN';
+            document.getElementById('currentModeLabel').innerText = 'MODE: CAMPAIGN';
+            document.getElementById('stagePicker').classList.remove('hidden');
+        });
+
+        document.getElementById('btnStartEndless').addEventListener('click', () => {
+            gameMode = 'ENDLESS';
+            document.getElementById('currentModeLabel').innerText = 'MODE: ENDLESS PATROL';
+            document.getElementById('stagePicker').classList.add('hidden');
+        });
+
+        document.querySelectorAll('.stage-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.stage-btn').forEach(b => b.classList.remove('active', 'border-orange-500'));
+                btn.classList.add('active', 'border-orange-500');
+                currentStage = parseInt(btn.getAttribute('data-stage'));
+            });
+        });
+
+        document.getElementById('btnLaunchGame').addEventListener('click', () => {
+            audioSynth.init();
+            document.getElementById('menuModal').classList.add('hidden');
+            gameState = 'PLAYING';
+            firewallHP = 100;
+            score = 0;
+            combo = 1;
+            streak = 0;
+            phishNeutralizedCount = 0;
+            totalInspected = 0;
+            dataPods = [];
+            updateHUDDisplay();
+        });
+
+        document.getElementById('btnShop').addEventListener('click', () => {
+            document.getElementById('shopModal').classList.remove('hidden');
+        });
+        document.getElementById('btnCloseShop').addEventListener('click', () => {
+            document.getElementById('shopModal').classList.add('hidden');
+        });
+
+        document.getElementById('btnCodex').addEventListener('click', () => {
+            document.getElementById('codexModal').classList.remove('hidden');
+            loadCodexTopic('typosquat');
+        });
+        document.getElementById('btnCloseCodex').addEventListener('click', () => {
+            document.getElementById('codexModal').classList.add('hidden');
+        });
+
+        document.getElementById('btnSound').addEventListener('click', () => {
+            const isMuted = audioSynth.toggleMute();
+            document.getElementById('soundIcon').className = isMuted ? 'fa-solid fa-volume-xmark text-red-400' : 'fa-solid fa-volume-high text-orange-300';
+        });
+
+        document.getElementById('btnCRT').addEventListener('click', () => {
+            const crt = document.getElementById('crtOverlay');
+            crt.classList.toggle('opacity-0');
+        });
+
+        document.getElementById('btnPause').addEventListener('click', () => {
+            if (gameState === 'PLAYING') {
+                gameState = 'PAUSED';
+                document.getElementById('pauseIcon').className = 'fa-solid fa-play';
+                showToast('⏸ GAME PAUSED', 'success');
+            } else if (gameState === 'PAUSED') {
+                gameState = 'PLAYING';
+                document.getElementById('pauseIcon').className = 'fa-solid fa-pause';
+            }
+        });
+
+        document.getElementById('btnRetryMission').addEventListener('click', () => {
+            document.getElementById('summaryModal').classList.add('hidden');
+            document.getElementById('btnLaunchGame').click();
+        });
+        document.getElementById('btnMenuReturn').addEventListener('click', () => {
+            document.getElementById('summaryModal').classList.add('hidden');
+            document.getElementById('menuModal').classList.remove('hidden');
+            gameState = 'MENU';
+        });
+
+        // --- SHOP PURCHASES ---
+        document.getElementById('buyAIScanner').addEventListener('click', () => {
+            if (credits >= 150 && !hasAIScanner) {
+                credits -= 150;
+                hasAIScanner = true;
+                document.getElementById('buyAIScanner').innerText = 'PURCHASED ✓';
+                document.getElementById('buyAIScanner').disabled = true;
+                updateHUDDisplay();
+                showToast('🤖 AI SCANNER UNLOCKED!', 'success');
+            }
+        });
+
+        document.getElementById('buyEMP').addEventListener('click', () => {
+            if (credits >= 200 && !hasEMP) {
+                credits -= 200;
+                hasEMP = true;
+                document.getElementById('buyEMP').innerText = 'ACTIVE ✓';
+                updateHUDDisplay();
+                showToast('⚡ EMP STUNNER ENGAGED!', 'success');
+            }
+        });
+
+        document.getElementById('buyReelSpeed').addEventListener('click', () => {
+            if (credits >= 100) {
+                credits -= 100;
+                reelSpeedMultiplier += 0.8;
+                updateHUDDisplay();
+                showToast('⚡ QUANTUM REEL SPEED UPGRADED!', 'success');
+            }
+        });
+
+        document.getElementById('buyShieldRepair').addEventListener('click', () => {
+            if (credits >= 120 && firewallHP < maxFirewallHP) {
+                credits -= 120;
+                firewallHP = Math.min(maxFirewallHP, firewallHP + 40);
+                updateHUDDisplay();
+                showToast('🛡️ CITY FIREWALL REPAIRED!', 'success');
+            }
+        });
+
+        function loadCodexTopic(topicKey) {
+            const topic = CODEX_DATA[topicKey];
+            if (!topic) return;
+            document.getElementById('codexDetailPane').innerHTML = `
+                <h3 class="font-orbitron text-sm font-bold text-amber-400 border-b border-orange-900 pb-1 mb-2">${topic.title}</h3>
+                <p class="leading-relaxed">${topic.content}</p>
+            `;
+        }
+
+        document.querySelectorAll('.codex-nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.codex-nav-btn').forEach(b => b.classList.remove('bg-orange-900/50', 'text-amber-300'));
+                btn.classList.add('bg-orange-900/50', 'text-amber-300');
+                loadCodexTopic(btn.getAttribute('data-topic'));
+            });
+        });
+
+    </script>
+</body>
+</html>
