@@ -309,29 +309,3 @@ function endGame(won, reason) {
         const bonus = Math.max(0, timer) * 10 + Math.max(0, integrity) * 5;
         score += bonus;
         updateHUD();
-        log("All notifications processed, good boy", "log-good");
-        showOverlay("City Secured!!", [
-            "You sorted every update with " + integrity + "% shield integrity left",
-            "Final score: " + score + " (includes " + bonus + " bonus)"
-        ], "Play Again");
-    } else {
-        updateHUD();
-        log("Breach Detected.", "log-bad");
-        showOverlay("Network Breached", [
-            reason || "yeah",
-            "The true test has failed us",
-            "The buddha has truly been testing us",
-            "Final score: " + score
-        ], "Try Again (maybe go back to roblox)");
-    }
-}
-
-// startup 
-feed.innerHTML = "";
-updateHUD();
-showOverlay("Neon City Defender", [
-    "Some no no people are trying to breach our grid",
-    "Apply the legit updates, and ignore the malicious ones",
-    "Correct calls buy you time, mistakes cost time and shield integrity",
-    "Sort all " + notifications.length + " notifications before the breach"
-], "Commence");
