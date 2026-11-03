@@ -1,5 +1,4 @@
-/* Core Layout - Only applies when inside a .home-page container */
-.home-page {
+#homepage-hub {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     line-height: 1.6;
     color: #333333;
@@ -9,23 +8,25 @@
     box-sizing: border-box;
 }
 
-.home-page * {
+/* Ensure reset only triggers inside the hub container */
+#homepage-hub * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
-.home-page .container {
+#homepage-hub .menu-container {
     max-width: 800px;
     margin: 40px auto;
     background: #ffffff;
     padding: 30px;
     border: 1px solid #e0e0e0;
     border-radius: 4px;
+    box-shadow: none;
 }
 
-/* Typography */
-.home-page h1 {
+/* Typography styles locked to the homepage components */
+#homepage-hub .menu-title {
     font-size: 2.5rem;
     color: #111111;
     margin-bottom: 10px;
@@ -33,28 +34,25 @@
     padding-bottom: 10px;
 }
 
-.home-page p {
+#homepage-hub .menu-subtitle {
     font-size: 1.1rem;
     color: #666666;
     margin-bottom: 25px;
 }
 
-.home-page h2 {
-    font-size: 1.5rem;
-    color: #222222;
-    margin-bottom: 15px;
-}
-
-/* Game Selection Links/List */
-.home-page ul {
+/* List Formatting */
+#homepage-hub .menu-list {
     list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-.home-page li {
+#homepage-hub .menu-list li {
     margin-bottom: 12px;
 }
 
-.home-page .game-link {
+/* Static, basic buttons */
+#homepage-hub .menu-btn {
     display: block;
     color: #ffffff;
     background-color: #222222;
@@ -65,19 +63,19 @@
     border: 1px solid #222222;
 }
 
-/* Static Hover States */
-.home-page .game-link:hover, 
-.home-page .game-link:focus {
+/* Plain instantaneous hover & active states (no transitions, no animations) */
+#homepage-hub .menu-btn:hover, 
+#homepage-hub .menu-btn:focus {
     background-color: #f0f0f0;
     color: #222222;
 }
 
-.home-page .game-link:active {
+#homepage-hub .menu-btn:active {
     background-color: #dddddd;
 }
 
-/* Footer */
-.home-page footer {
+/* Footer layout rules */
+#homepage-hub .menu-footer {
     margin-top: 40px;
     font-size: 0.9rem;
     color: #888888;
