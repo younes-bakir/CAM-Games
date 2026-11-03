@@ -4,9 +4,83 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CAM Games Hub</title>
-    <link rel="stylesheet" href="style.css">
+    
+    <!-- Isolated Homepage Styles - No animations, completely basic -->
+    <style>
+        #homepage-hub-body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #2d3748;
+            background: #f0f2f5;
+            padding: 3rem 1rem;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        #homepage-hub-body * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .home-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 3rem 2.5rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .home-title {
+            font-size: 2.5rem;
+            color: #1a202c;
+            margin-bottom: 0.5rem;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .home-subtitle {
+            color: #718096;
+            margin-bottom: 2.5rem;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .home-game-list {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .home-game-card {
+            display: block;
+            padding: 1.5rem;
+            background-color: #222222;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.2rem;
+            border-radius: 4px;
+            border: 1px solid #222222;
+            text-align: center;
+        }
+
+        /* Instant instantaneous hover states - No animation delays */
+        .home-game-card:hover,
+        .home-game-card:focus {
+            background-color: #f0f0f0;
+            color: #222222;
+            border-color: #222222;
+        }
+
+        .home-game-card:active {
+            background-color: #dddddd;
+        }
+    </style>
 </head>
-<body class="home-body">
+<body id="homepage-hub-body">
 
     <div class="home-container">
         <h1 class="home-title">CAM Games</h1>
