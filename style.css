@@ -25,7 +25,7 @@ body {
     padding: 20px;
 }
 
-/* Top HUD Dashboard */
+/* top dashboard */
 header {
     display: flex;
     justify-content: space-between;
@@ -69,7 +69,7 @@ header {
     text-shadow: 0 0 5px var(--neon-green);
 }
 
-/* Main Gameplay Layout */
+/* main game layout */
 main {
     display: grid;
     grid-template-columns: 1fr 320px;
@@ -78,7 +78,7 @@ main {
     min-height: 0;
 }
 
-/* Feed Area for Incoming Alerts */
+/* feed */
 .feed-container {
     background: var(--panel-bg);
     border: 1px solid rgba(0, 240, 255, 0.2);
@@ -89,7 +89,7 @@ main {
     overflow-y: auto;
 }
 
-/* Notification Cards */
+/* notifications */
 .card {
     background: rgba(255, 255, 255, 0.03);
     border-left: 4px solid var(--text-dim);
@@ -100,7 +100,7 @@ main {
     transition: all 0.2s ease;
 }
 
-/* State variants for JS integration */
+/* state variants */
 .card.real-update {
     border-left-color: var(--neon-blue);
 }
@@ -124,7 +124,7 @@ main {
     gap: 10px;
 }
 
-/* Minimalistic Buttons */
+/* buttons */
 button {
     background: transparent;
     border: 1px solid var(--text-dim);
@@ -159,7 +159,7 @@ button.btn-dismiss:hover {
     box-shadow: 0 0 8px rgba(255, 0, 85, 0.3);
 }
 
-/* Sidebar Control Panel */
+/* sidebar control panel */
 .sidebar {
     background: var(--panel-bg);
     border: 1px solid rgba(0, 240, 255, 0.2);
@@ -181,4 +181,67 @@ button.btn-dismiss:hover {
     padding-top: 15px;
     font-size: 0.8rem;
     color: var(--text-dim);
+}
+
+/* game states for mainjs */
+.shield-warn {
+    color: #ffd400;
+    text-shadow: 0 0 5px #ffd400;
+}
+
+.shield-bad {
+    color: var(--neon-pink);
+    text-shadow: 0 0 5px var(--neon-pink);
+}
+
+.card.card-correct {
+    border-left-color: var(--neon-green);
+    background: rgba(57, 255, 20, 0.08);
+    opacity: 0.4;
+}
+
+.card.card-wrong {
+    border-left-color: var(--neon-pink);
+    background: rgba(255, 0, 85, 0.1);
+    opacity: 0.4;
+}
+
+button:disabled {
+    cursor: default;
+    opacity: 0.5;
+}
+
+.log-good { color: var(--neon-green); }
+.log-bad { color: var(--neon-pink); }
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 18, 0.88);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.overlay-box {
+    background: var(--panel-bg);
+    border: 1px solid var(--neon-blue);
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+    padding: 30px 40px;
+    max-width: 480px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.overlay-box h2 {
+    color: var(--neon-blue);
+    letter-spacing: 3px;
+}
+
+.overlay-box p {
+    color: var(--text-main);
+    line-height: 1.4;
 }
