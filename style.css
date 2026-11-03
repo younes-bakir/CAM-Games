@@ -8,13 +8,14 @@
     --text-dim: #7070a0;
 }
 
-* {
+/* Scoped Scifi Game Layout Fixes */
+.younes-body * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
-body {
+.younes-body {
     background-color: var(--bg-color);
     color: var(--text-main);
     font-family: 'Courier New', Courier, monospace;
@@ -26,7 +27,7 @@ body {
 }
 
 /* top dashboard */
-header {
+.younes-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -37,40 +38,40 @@ header {
     margin-bottom: 20px;
 }
 
-.hud-title {
+.younes-body .hud-title {
     color: var(--neon-blue);
     font-weight: bold;
     letter-spacing: 2px;
 }
 
-.hud-status {
+.younes-body .hud-status {
     display: flex;
     gap: 30px;
 }
 
-.status-item span {
+.younes-body .status-item span {
     color: var(--text-dim);
     font-size: 0.8rem;
     display: block;
 }
 
-.status-item div {
+.younes-body .status-item div {
     font-size: 1.5rem;
     font-weight: bold;
 }
 
-.timer-alert {
+.younes-body .timer-alert {
     color: var(--neon-pink);
     text-shadow: 0 0 5px var(--neon-pink);
 }
 
-.shield-good {
+.younes-body .shield-good {
     color: var(--neon-green);
     text-shadow: 0 0 5px var(--neon-green);
 }
 
 /* main game layout */
-main {
+.younes-main {
     display: grid;
     grid-template-columns: 1fr 320px;
     gap: 20px;
@@ -79,7 +80,7 @@ main {
 }
 
 /* feed */
-.feed-container {
+.younes-body .feed-container {
     background: var(--panel-bg);
     border: 1px solid rgba(0, 240, 255, 0.2);
     padding: 20px;
@@ -90,7 +91,7 @@ main {
 }
 
 /* notifications */
-.card {
+.younes-body .card {
     background: rgba(255, 255, 255, 0.03);
     border-left: 4px solid var(--text-dim);
     padding: 15px;
@@ -101,31 +102,31 @@ main {
 }
 
 /* state variants */
-.card.real-update {
+.younes-body .card.real-update {
     border-left-color: var(--neon-blue);
 }
 
-.card.fake-ad {
+.younes-body .card.fake-ad {
     border-left-color: var(--neon-pink);
 }
 
-.card-info h3 {
+.younes-body .card-info h3 {
     font-size: 1rem;
     margin-bottom: 5px;
 }
 
-.card-info p {
+.younes-body .card-info p {
     font-size: 0.85rem;
     color: var(--text-dim);
 }
 
-.card-actions {
+.younes-body .card-actions {
     display: flex;
     gap: 10px;
 }
 
 /* buttons */
-button {
+.younes-body button {
     background: transparent;
     border: 1px solid var(--text-dim);
     color: var(--text-main);
@@ -135,32 +136,32 @@ button {
     transition: all 0.2s ease;
 }
 
-button:hover {
+.younes-body button:hover {
     background: rgba(255, 255, 255, 0.1);
 }
 
-button.btn-patch {
+.younes-body button.btn-patch {
     border-color: var(--neon-green);
     color: var(--neon-green);
 }
 
-button.btn-patch:hover {
+.younes-body button.btn-patch:hover {
     background: rgba(57, 255, 20, 0.1);
     box-shadow: 0 0 8px rgba(57, 255, 20, 0.3);
 }
 
-button.btn-dismiss {
+.younes-body button.btn-dismiss {
     border-color: var(--neon-pink);
     color: var(--neon-pink);
 }
 
-button.btn-dismiss:hover {
+.younes-body button.btn-dismiss:hover {
     background: rgba(255, 0, 85, 0.1);
     box-shadow: 0 0 8px rgba(255, 0, 85, 0.3);
 }
 
 /* sidebar control panel */
-.sidebar {
+.younes-body .sidebar {
     background: var(--panel-bg);
     border: 1px solid rgba(0, 240, 255, 0.2);
     padding: 20px;
@@ -169,14 +170,14 @@ button.btn-dismiss:hover {
     justify-content: space-between;
 }
 
-.terminal-log {
+.younes-body .terminal-log {
     font-size: 0.8rem;
     color: var(--neon-blue);
     opacity: 0.7;
     line-height: 1.4;
 }
 
-.system-specs {
+.younes-body .system-specs {
     border-top: 1px dashed rgba(0, 240, 255, 0.2);
     padding-top: 15px;
     font-size: 0.8rem;
@@ -184,37 +185,37 @@ button.btn-dismiss:hover {
 }
 
 /* game states for mainjs */
-.shield-warn {
+.younes-body .shield-warn {
     color: #ffd400;
     text-shadow: 0 0 5px #ffd400;
 }
 
-.shield-bad {
+.younes-body .shield-bad {
     color: var(--neon-pink);
     text-shadow: 0 0 5px var(--neon-pink);
 }
 
-.card.card-correct {
+.younes-body .card.card-correct {
     border-left-color: var(--neon-green);
     background: rgba(57, 255, 20, 0.08);
     opacity: 0.4;
 }
 
-.card.card-wrong {
+.younes-body .card.card-wrong {
     border-left-color: var(--neon-pink);
     background: rgba(255, 0, 85, 0.1);
     opacity: 0.4;
 }
 
-button:disabled {
+.younes-body button:disabled {
     cursor: default;
     opacity: 0.5;
 }
 
-.log-good { color: var(--neon-green); }
-.log-bad { color: var(--neon-pink); }
+.younes-body .log-good { color: var(--neon-green); }
+.younes-body .log-bad { color: var(--neon-pink); }
 
-.overlay {
+.younes-body .overlay {
     position: fixed;
     inset: 0;
     background: rgba(10, 10, 18, 0.88);
@@ -224,7 +225,7 @@ button:disabled {
     z-index: 10;
 }
 
-.overlay-box {
+.younes-body .overlay-box {
     background: var(--panel-bg);
     border: 1px solid var(--neon-blue);
     box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
@@ -236,12 +237,12 @@ button:disabled {
     gap: 14px;
 }
 
-.overlay-box h2 {
+.younes-body .overlay-box h2 {
     color: var(--neon-blue);
     letter-spacing: 3px;
 }
 
-.overlay-box p {
+.younes-body .overlay-box p {
     color: var(--text-main);
     line-height: 1.4;
 }
