@@ -1,19 +1,16 @@
-// =====================================================
-// NEON DEFENDER - main.js
-// Sort incoming update notifications: apply the real
-// ones, ignore the fake ones, before the breach timer
-// or the shield runs out.
-// =====================================================
+/* 
+Younes Bakir
+10/29/26
+CAM Game
+*/ 
 
-// ---------- core game values (shown in the HUD) ----------
-const START_TIME = 45;      // starting seconds on the "time to breach" clock
-let timer = START_TIME;     // seconds remaining
-let integrity = 100;        // shield percentage (0 = breached)
-let score = 0;              // player score
+// core game values
+const START_TIME = 45;      
+let timer = START_TIME;     
+let integrity = 100;        
+let score = 0;              
 
-// ---------- notification data ----------
-// type "real" = legitimate update (player should APPLY PATCH)
-// type "fake" = malicious/suspicious (player should IGNORE)
+// notification data
 const notifications = [
     {
         title: "Kernel Patch 1.4.0",
@@ -67,32 +64,29 @@ const notifications = [
     }
 ];
 
-// ---------- game config (tweak these to change difficulty) ----------
-const MAX_VISIBLE = 3;             // how many cards can be on screen at once
-const TIME_BONUS = 3;              // seconds gained for a correct decision
-const TIME_PENALTY = 5;            // seconds lost for a wrong decision
-const INTEGRITY_HIT_MALWARE = 30;  // shield damage for applying a fake patch
-const INTEGRITY_HIT_MISSED = 15;   // shield damage for ignoring a real update
+// game config
+const MAX_VISIBLE = 3;             
+const TIME_BONUS = 2;              
+const TIME_PENALTY = 8;            
+const INTEGRITY_HIT_MALWARE = 35;  
+const INTEGRITY_HIT_MISSED = 25;   
 
-// ---------- grab elements from index.html ----------
-const feed = document.querySelector(".feed-container");   // where cards appear
-const timerEl = document.querySelector(".timer-alert");   // countdown display
-const shieldEl = document.querySelector(".hud-status .status-item:nth-child(2) div");  // shield %
-const scoreEl = document.querySelector(".hud-status .status-item:nth-child(3) div");   // score
-const logEl = document.querySelector(".terminal-log");    // sidebar terminal text
-const threatEl = document.querySelector(".system-specs p:nth-child(2)");  // "THREAT LEVEL" line
+// grab elements from index.html
+const feed = document.querySelector(".feed-container");   
+const timerEl = document.querySelector(".timer-alert");   
+const shieldEl = document.querySelector(".hud-status .status-item:nth-child(2) div");  
+const scoreEl = document.querySelector(".hud-status .status-item:nth-child(3) div");   
+const logEl = document.querySelector(".terminal-log");    
+const threatEl = document.querySelector(".system-specs p:nth-child(2)");
 
-// ---------- game state (reset every round in startGame) ----------
-let queue = [];       // notifications still waiting to be shown
+// game state (startGame resets every round)
+let queue = [];       // notifications to be shown
 let active = 0;       // number of cards currently on screen
 let resolved = 0;     // number of cards the player has decided on
 let running = false;  // true while a round is in progress
 let tickId = null;    // id of the 1-second timer interval
 
-// ---------- helper functions ----------
-
-// Returns a randomly ordered copy of an array (Fisher-Yates shuffle)
-// so each round shows the notifications in a different order.
+// returns a randomly ordered copy of an array
 function shuffle(arr) {
     const a = arr.slice();
     for (let i = a.length - 1; i > 0; i--) {
@@ -102,14 +96,13 @@ function shuffle(arr) {
     return a;
 }
 
-// Converts seconds into an MM:SS string, e.g. 45 -> "00:45".
+// Converts seconds into a mm:ss string, where mm = minutes and ss = seconds
 function formatTime(s) {
     const m = Math.floor(s / 60);
     return String(m).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
 }
 
-// Adds a line to the sidebar terminal. Optional cls colors it
-// (log-good = green, log-bad = pink). Only the last 10 lines are kept.
+// adds a line to the sidebar terminal
 function log(text, cls) {
     const p = document.createElement("p");
     p.textContent = "> " + text;
@@ -118,14 +111,13 @@ function log(text, cls) {
     while (logEl.children.length > 10) logEl.removeChild(logEl.firstChild);
 }
 
-// Refreshes the top HUD (timer, shield, score) and the threat level
-// from the current values. Also swaps the shield color as it drops.
+// refreshes the top hud, threat level, and swaps shield color as it drops
 function updateHUD() {
     timerEl.textContent = formatTime(Math.max(0, timer));
     shieldEl.textContent = Math.max(0, integrity) + "%";
     scoreEl.textContent = String(score).padStart(4, "0");
 
-    // green above 60%, yellow above 30%, pink below that
+    // green above 60%, yellow above 30%, pink below 30
     shieldEl.classList.remove("shield-good", "shield-warn", "shield-bad");
     if (integrity > 60) shieldEl.classList.add("shield-good");
     else if (integrity > 30) shieldEl.classList.add("shield-warn");
@@ -138,16 +130,14 @@ function updateHUD() {
     }
 }
 
-// ---------- notification cards ----------
+// notification cards------------------------------------------------------------------ 
 
-// Builds one notification card (title, description, and the two
-// buttons) for a notification object and wires up the button clicks.
-// No real/fake class is added, so the card doesn't give away the answer.
+// Builds one notif card for a notification object and instates button functionality
 function createCard(n) {
     const card = document.createElement("div");
     card.className = "card";
 
-    // left side: title + description
+    // title + desc on left
     const info = document.createElement("div");
     info.className = "card-info";
     const h3 = document.createElement("h3");
@@ -156,7 +146,7 @@ function createCard(n) {
     p.textContent = n.desc;
     info.append(h3, p);
 
-    // right side: APPLY PATCH / IGNORE buttons
+    // apply/ignore buttons on right
     const actions = document.createElement("div");
     actions.className = "card-actions";
     const patch = document.createElement("button");
@@ -169,14 +159,12 @@ function createCard(n) {
 
     card.append(info, actions);
 
-    // true = player applied the patch, false = player ignored it
     patch.addEventListener("click", () => decide(card, n, true));
     dismiss.addEventListener("click", () => decide(card, n, false));
     return card;
 }
 
-// Takes the next notification from the queue and puts its card in the
-// feed, as long as a round is running and there's room on screen.
+// Takes the next notification from the queue and puts its card in the feed as long as round is active and there's room on screen
 function spawnCard() {
     if (!running || queue.length === 0 || active >= MAX_VISIBLE) return;
     const n = queue.shift();
@@ -185,18 +173,15 @@ function spawnCard() {
     log("Incoming: " + n.title);
 }
 
-// Keeps the feed topped up to MAX_VISIBLE cards.
 function fillFeed() {
     while (active < MAX_VISIBLE && queue.length > 0) spawnCard();
 }
 
-// ---------- player decisions ----------
+// player decisions---------------------------------------------------------------------
 
-// Called when the player clicks a button on a card.
-// applied = true if they clicked APPLY PATCH, false if IGNORE.
-// Decides if it was right, updates score/time/shield, then removes the card.
+// called when the player clicks a button on a card.
 function decide(card, n, applied) {
-    // ignore clicks if the game is over or this card was already handled
+    // ignore clicks if the game is over or the specific card was already handled
     if (!running || card.dataset.done) return;
     card.dataset.done = "1";
     card.querySelectorAll("button").forEach(b => (b.disabled = true));
@@ -204,15 +189,15 @@ function decide(card, n, applied) {
     // correct = applied a real update OR ignored a fake one
     const correct = (n.type === "real") === applied;
 
+    // rewarded
     if (correct) {
-        // reward: points and extra time
         score += 100;
         timer += TIME_BONUS;
         card.classList.add("card-correct");
         log(applied ? "Patch verified & applied: " + n.title
                     : "Threat blocked: " + n.title, "log-good");
+    // exiled
     } else {
-        // punishment: lose points and time (score never goes below 0)
         score = Math.max(0, score - 50);
         timer -= TIME_PENALTY;
         card.classList.add("card-wrong");
@@ -231,8 +216,7 @@ function decide(card, n, applied) {
     active--;
     updateHUD();
 
-    // let the green/red flash show briefly, then remove the card
-    // and either finish the game or bring in the next notification
+    // green/red flash shows briefly then removes card, and either finish the game or bring the next notification
     setTimeout(() => {
         card.remove();
         if (!running) return;
@@ -240,23 +224,21 @@ function decide(card, n, applied) {
         else fillFeed();
     }, 350);
 
-    // check lose conditions right away
+    // check lose conditions
     if (integrity <= 0) endGame(false, "Shield integrity reached 0%.");
     else if (timer <= 0) endGame(false, "The breach timer ran out.");
 }
 
-// ---------- game flow ----------
+// game flow----------------------------------------------------------------------------------
 
-// Runs once per second while playing: counts the timer down
-// and ends the game if it hits zero.
+// ends the game if timer hits 0
 function tick() {
     timer--;
     updateHUD();
     if (timer <= 0) endGame(false, "The breach timer ran out.");
 }
 
-// Builds and shows a full-screen message box (start, win, or lose screen)
-// with a title, some lines of text, and one button that starts a new round.
+// builds and shows a start/win/lose screen
 function showOverlay(title, lines, buttonLabel) {
     // remove any overlay that's already showing
     const old = document.querySelector(".overlay");
@@ -271,14 +253,12 @@ function showOverlay(title, lines, buttonLabel) {
     h.textContent = title;
     box.appendChild(h);
 
-    // one paragraph per line of text
     lines.forEach(t => {
         const p = document.createElement("p");
         p.textContent = t;
         box.appendChild(p);
     });
 
-    // clicking the button closes the overlay and starts a fresh round
     const btn = document.createElement("button");
     btn.className = "btn-patch";
     btn.textContent = buttonLabel;
@@ -292,17 +272,17 @@ function showOverlay(title, lines, buttonLabel) {
     document.body.appendChild(overlay);
 }
 
-// Resets everything and begins a new round.
+// reset everything and begin a new round
 function startGame() {
-    clearInterval(tickId);   // make sure no old timer is still running
+    clearInterval(tickId);   // makes sure no old timer is still running
 
-    // reset values
+    // reset values and shuffle card order
     timer = START_TIME;
     integrity = 100;
     score = 0;
     resolved = 0;
     active = 0;
-    queue = shuffle(notifications);  // fresh random order
+    queue = shuffle(notifications);
     running = true;
 
     // clear the screen and the terminal, then show the first cards
@@ -313,12 +293,11 @@ function startGame() {
     updateHUD();
     fillFeed();
 
-    // start the countdown (tick runs every 1000 ms)
+    // start the countdown
     tickId = setInterval(tick, 1000);
 }
 
-// Ends the round. won = true for a win, false for a loss;
-// reason is the text shown on the lose screen.
+// ends round, reason is the text shown on the lose screen
 function endGame(won, reason) {
     if (!running) return;    // prevents ending twice
     running = false;
@@ -330,29 +309,29 @@ function endGame(won, reason) {
         const bonus = Math.max(0, timer) * 10 + Math.max(0, integrity) * 5;
         score += bonus;
         updateHUD();
-        log("All notifications processed. City secured.", "log-good");
-        showOverlay("CITY SECURED", [
-            "You sorted every update with " + integrity + "% shield integrity left.",
-            "Final score: " + score + " (includes +" + bonus + " bonus)"
-        ], "PLAY AGAIN");
+        log("All notifications processed, good boy", "log-good");
+        showOverlay("City Secured!!", [
+            "You sorted every update with " + integrity + "% shield integrity left",
+            "Final score: " + score + " (includes " + bonus + " bonus)"
+        ], "Play Again");
     } else {
         updateHUD();
-        log("BREACH DETECTED.", "log-bad");
-        showOverlay("NETWORK BREACHED", [
-            reason || "The shield has failed.",
+        log("Breach Detected.", "log-bad");
+        showOverlay("Network Breached", [
+            reason || "yeah",
+            "The true test has failed us",
+            "The buddha has truly been testing us",
             "Final score: " + score
-        ], "TRY AGAIN");
+        ], "Try Again (maybe go back to roblox)");
     }
 }
 
-// ---------- startup ----------
-// On page load: clear the demo cards from the HTML, draw the HUD,
-// and show the start screen. The game begins when the player clicks START.
+// startup 
 feed.innerHTML = "";
 updateHUD();
-showOverlay("NEON DEFENDER", [
-    "Fake updates are trying to breach the grid.",
-    "APPLY PATCH on legitimate updates. IGNORE the malicious ones.",
-    "Correct calls buy you time. Mistakes cost time and shield integrity.",
-    "Sort all " + notifications.length + " notifications before the breach."
-], "START DEFENSE");
+showOverlay("Neon City Defender", [
+    "Some no no people are trying to breach our grid",
+    "Apply the legit updates, and ignore the malicious ones",
+    "Correct calls buy you time, mistakes cost time and shield integrity",
+    "Sort all " + notifications.length + " notifications before the breach"
+], "Commence");
