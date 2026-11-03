@@ -6,85 +6,50 @@
     <title>Neon City Defender</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="younes-body">
+<body>
 
-    <!-- hud -->
-    <header class="younes-header">
-        <div class="hud-title">Neon City Defender</div>
+    <header>
+        <div class="hud-title">NEON_CITY_DEFENDER_v1.0</div>
         <div class="hud-status">
             <div class="status-item">
-                <span>Time To Breach</span>
+                <span>TIME TO BREACH</span>
                 <div class="timer-alert">00:45</div>
             </div>
             <div class="status-item">
-                <span>Shield Integrity</span>
-                <div class="shield-good">80%</div>
+                <span>SHIELD INTEGRITY</span>
+                <div class="shield-good">100%</div>
             </div>
             <div class="status-item">
-                <span>Score</span>
-                <div>0240</div>
+                <span>SCORE</span>
+                <div class="score-val">0000</div>
             </div>
         </div>
     </header>
 
-    <!-- main game window -->
-    <main class="younes-main">
-        <!-- incoming notifs -->
+    <main>
         <section class="feed-container">
-            
-            <!-- update -->
-            <div class="card real-update">
-                <div class="card-info">
-                    <h3>Kernel Patch v4.1.2</h3>
-                    <p>Source: Trusted Core Dev | Size: 45MB</p>
-                </div>
-                <div class="card-actions">
-                    <button class="btn-patch">APPLY PATCH</button>
-                    <button class="btn-dismiss">IGNORE</button>
-                </div>
-            </div>
-
-            <!-- fake popup -->
-            <div class="card fake-ad">
-                <div class="card-info">
-                    <h3>CRITICAL WARNING: RAM IS FULL!</h3>
-                    <p>Click to download more memory instantly.</p>
-                </div>
-                <div class="card-actions">
-                    <button class="btn-patch">APPLY PATCH</button>
-                    <button class="btn-dismiss">IGNORE</button>
-                </div>
-            </div>
-
-            <!-- unchecked card -->
-            <div class="card">
-                <div class="card-info">
-                    <h3>System Hotfix #099</h3>
-                    <p>Source: Unknown Server | Protocol: Insecure</p>
-                </div>
-                <div class="card-actions">
-                    <button class="btn-patch">APPLY PATCH</button>
-                    <button class="btn-dismiss">IGNORE</button>
-                </div>
-            </div>
-
+            <!-- Cards spawned dynamically by main.js -->
         </section>
 
-        <!-- sidebar -->
         <aside class="sidebar">
             <div class="terminal-log">
-                <p>> Initializing shield nodes...</p>
-                <p>> Warning: Outdated node software detected.</p>
-                <p>> Incoming packets buffering...</p>
-                <p>> Filter active. Awaiting input.</p>
+                <!-- Log entries added dynamically by main.js -->
             </div>
             <div class="system-specs">
                 <p>TARGET: NEON_CITY_GRID_04</p>
-                <p>THREAT LEVEL: CRITICAL</p>
+                <p>THREAT LEVEL: ELEVATED</p>
             </div>
         </aside>
     </main>
 
     <script src="main.js"></script>
+    <script>
+        // Start game overlay initialization
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof showOverlay === 'function') {
+                showOverlay("SYSTEM READY", ["Threat payloads incoming.", "Sort real core patches from fake ads."], "INITIALIZE SHIELD");
+            }
+        });
+    </script>
 </body>
 </html>
