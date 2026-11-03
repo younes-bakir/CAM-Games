@@ -1,248 +1,87 @@
-:root {
-    --bg-color: #0a0a12;
-    --panel-bg: #121225;
-    --neon-blue: #00f0ff;
-    --neon-pink: #ff0055;
-    --neon-green: #39ff14;
-    --text-main: #e0e0ff;
-    --text-dim: #7070a0;
+/* Core Layout - Only applies when inside a .home-page container */
+.home-page {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    line-height: 1.6;
+    color: #333333;
+    background-color: #f9f9f9;
+    padding: 20px;
+    min-height: 100vh;
+    box-sizing: border-box;
 }
 
-/* Scoped Scifi Game Layout Fixes */
-.younes-body * {
+.home-page * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
-.younes-body {
-    background-color: var(--bg-color);
-    color: var(--text-main);
-    font-family: 'Courier New', Courier, monospace;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
-    padding: 20px;
+.home-page .container {
+    max-width: 800px;
+    margin: 40px auto;
+    background: #ffffff;
+    padding: 30px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
 }
 
-/* top dashboard */
-.younes-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 20px;
-    background: var(--panel-bg);
-    border: 1px solid var(--neon-blue);
-    box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
-    margin-bottom: 20px;
+/* Typography */
+.home-page h1 {
+    font-size: 2.5rem;
+    color: #111111;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #333333;
+    padding-bottom: 10px;
 }
 
-.younes-body .hud-title {
-    color: var(--neon-blue);
-    font-weight: bold;
-    letter-spacing: 2px;
+.home-page p {
+    font-size: 1.1rem;
+    color: #666666;
+    margin-bottom: 25px;
 }
 
-.younes-body .hud-status {
-    display: flex;
-    gap: 30px;
-}
-
-.younes-body .status-item span {
-    color: var(--text-dim);
-    font-size: 0.8rem;
-    display: block;
-}
-
-.younes-body .status-item div {
+.home-page h2 {
     font-size: 1.5rem;
-    font-weight: bold;
+    color: #222222;
+    margin-bottom: 15px;
 }
 
-.younes-body .timer-alert {
-    color: var(--neon-pink);
-    text-shadow: 0 0 5px var(--neon-pink);
+/* Game Selection Links/List */
+.home-page ul {
+    list-style: none;
 }
 
-.younes-body .shield-good {
-    color: var(--neon-green);
-    text-shadow: 0 0 5px var(--neon-green);
+.home-page li {
+    margin-bottom: 12px;
 }
 
-/* main game layout */
-.younes-main {
-    display: grid;
-    grid-template-columns: 1fr 320px;
-    gap: 20px;
-    flex-grow: 1;
-    min-height: 0;
+.home-page .game-link {
+    display: block;
+    color: #ffffff;
+    background-color: #222222;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 12px 20px;
+    border-radius: 4px;
+    border: 1px solid #222222;
 }
 
-/* feed */
-.younes-body .feed-container {
-    background: var(--panel-bg);
-    border: 1px solid rgba(0, 240, 255, 0.2);
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    overflow-y: auto;
+/* Static Hover States */
+.home-page .game-link:hover, 
+.home-page .game-link:focus {
+    background-color: #f0f0f0;
+    color: #222222;
 }
 
-/* notifications */
-.younes-body .card {
-    background: rgba(255, 255, 255, 0.03);
-    border-left: 4px solid var(--text-dim);
-    padding: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: all 0.2s ease;
+.home-page .game-link:active {
+    background-color: #dddddd;
 }
 
-/* state variants */
-.younes-body .card.real-update {
-    border-left-color: var(--neon-blue);
-}
-
-.younes-body .card.fake-ad {
-    border-left-color: var(--neon-pink);
-}
-
-.younes-body .card-info h3 {
-    font-size: 1rem;
-    margin-bottom: 5px;
-}
-
-.younes-body .card-info p {
-    font-size: 0.85rem;
-    color: var(--text-dim);
-}
-
-.younes-body .card-actions {
-    display: flex;
-    gap: 10px;
-}
-
-/* buttons */
-.younes-body button {
-    background: transparent;
-    border: 1px solid var(--text-dim);
-    color: var(--text-main);
-    padding: 8px 16px;
-    font-family: inherit;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.younes-body button:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.younes-body button.btn-patch {
-    border-color: var(--neon-green);
-    color: var(--neon-green);
-}
-
-.younes-body button.btn-patch:hover {
-    background: rgba(57, 255, 20, 0.1);
-    box-shadow: 0 0 8px rgba(57, 255, 20, 0.3);
-}
-
-.younes-body button.btn-dismiss {
-    border-color: var(--neon-pink);
-    color: var(--neon-pink);
-}
-
-.younes-body button.btn-dismiss:hover {
-    background: rgba(255, 0, 85, 0.1);
-    box-shadow: 0 0 8px rgba(255, 0, 85, 0.3);
-}
-
-/* sidebar control panel */
-.younes-body .sidebar {
-    background: var(--panel-bg);
-    border: 1px solid rgba(0, 240, 255, 0.2);
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.younes-body .terminal-log {
-    font-size: 0.8rem;
-    color: var(--neon-blue);
-    opacity: 0.7;
-    line-height: 1.4;
-}
-
-.younes-body .system-specs {
-    border-top: 1px dashed rgba(0, 240, 255, 0.2);
-    padding-top: 15px;
-    font-size: 0.8rem;
-    color: var(--text-dim);
-}
-
-/* game states for mainjs */
-.younes-body .shield-warn {
-    color: #ffd400;
-    text-shadow: 0 0 5px #ffd400;
-}
-
-.younes-body .shield-bad {
-    color: var(--neon-pink);
-    text-shadow: 0 0 5px var(--neon-pink);
-}
-
-.younes-body .card.card-correct {
-    border-left-color: var(--neon-green);
-    background: rgba(57, 255, 20, 0.08);
-    opacity: 0.4;
-}
-
-.younes-body .card.card-wrong {
-    border-left-color: var(--neon-pink);
-    background: rgba(255, 0, 85, 0.1);
-    opacity: 0.4;
-}
-
-.younes-body button:disabled {
-    cursor: default;
-    opacity: 0.5;
-}
-
-.younes-body .log-good { color: var(--neon-green); }
-.younes-body .log-bad { color: var(--neon-pink); }
-
-.younes-body .overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(10, 10, 18, 0.88);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
-}
-
-.younes-body .overlay-box {
-    background: var(--panel-bg);
-    border: 1px solid var(--neon-blue);
-    box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
-    padding: 30px 40px;
-    max-width: 480px;
+/* Footer */
+.home-page footer {
+    margin-top: 40px;
+    font-size: 0.9rem;
+    color: #888888;
     text-align: center;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-.younes-body .overlay-box h2 {
-    color: var(--neon-blue);
-    letter-spacing: 3px;
-}
-
-.younes-body .overlay-box p {
-    color: var(--text-main);
-    line-height: 1.4;
+    border-top: 1px solid #eeeeee;
+    padding-top: 20px;
 }
