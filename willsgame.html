@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon City: System Defender 64</title>
+    <!-- 64-Bit Retro Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #050510;
+            --retro-cyan: #00f0ff;
+            --retro-magenta: #ff0055;
+            --retro-green: #00ff66;
+            --retro-yellow: #ffee00;
+            --window-bg: #121826;
+            --header-gradient: linear-gradient(90deg, #1e2942, #0f172a);
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            margin: 0;
+            padding: 0;
+            font-family: 'VT323', monospace;
+            image-rendering: pixelated;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #ffffff;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 64-Bit Canvas Background */
+        #bgCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* CRT Raster Scanlines Filter */
+        .crt-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.05), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.05));
+            background-size: 100% 4px, 6px 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* App Container */
+        #app {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        /* Retro HUD Bar with Focal Reboot Zone */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0d1322;
+            border: 4px ridge #00f0ff;
+            box-shadow: inset 2px 2px 0px #1e293b, inset -2px -2px 0px #0284c7, 0 0 15px rgba(0, 240, 255, 0.4);
+            padding: 8px 16px;
+            gap: 15px;
+        }
+
+        .brand-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9rem;
+            color: var(--retro-cyan);
+            text-shadow: 2px 2px 0px #000, 0 0 8px var(--retro-cyan);
+            letter-spacing: 1px;
+        }
+
+        .hud-stats {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .stat-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8rem;
+            color: #fff;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        /* Shield Bar */
+        .shield-container {
+            width: 140px;
+        }
+
+        .meter-bg {
+            width: 100%;
+            height: 14px;
+            background: #000;
+            border: 2px solid #334155;
+            box-shadow: inset 1px 1px 0 #000;
+            margin-top: 2px;
+            padding: 1px;
+        }
+
+        .meter-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #00ff66, #00f0ff);
+            transition: width 0.2s steps(10);
+        }
+
+        /* FOCAL REBOOT CONTROL PANEL */
+        .reboot-focus-panel {
+            background: linear-gradient(180deg, #1e293b, #0f172a);
+            border: 4px double var(--retro-yellow);
+            padding: 6px 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 0 10px rgba(255, 238, 0, 0.2);
+            min-width: 240px;
+        }
+
+        .reboot-btn {
+            width: 100%;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8rem;
+            background: #334155;
+            border: 3px outset #64748b;
+            color: #888;
+            padding: 10px 14px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            text-shadow: 1px 1px 0 #000;
+            transition: all 0.2s ease;
+        }
+
+        .reboot-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-style: inset;
+            background: #1e293b;
+        }
+
+        .reboot-btn.ready {
+            background: linear-gradient(135deg, #dc2626, #ff0055);
+            border-color: #ffee00;
+            color: #ffee00;
+            animation: reboot-pulse 0.5s infinite alternate;
+            box-shadow: 0 0 20px #ff0055;
+            cursor: pointer;
+        }
+
+        @keyframes reboot-pulse {
+            from { transform: scale(1); box-shadow: 0 0 10px #ff0055; }
+            to { transform: scale(1.05); box-shadow: 0 0 25px #ffee00; }
+        }
+
+        .reboot-gauge-bar {
+            width: 100%;
+            height: 8px;
+            background: #000;
+            border: 1px solid #475569;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+
+        .reboot-gauge-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00f0ff, #ffee00);
+            transition: width 0.3s ease;
+        }
+
+        /* Ticker Bar */
+        .ticker-bar {
+            background: #000;
+            border: 2px solid #334155;
+            border-left: 6px solid var(--retro-yellow);
+            margin: 8px 0;
+            padding: 6px 12px;
+            font-size: 1.1rem;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ticker-tag {
+            font-family: 'Press Start 2P', cursive;
+            background: var(--retro-yellow);
+            color: #000;
+            padding: 2px 4px;
+            font-size: 0.55rem;
+        }
+
+        /* Desktop Workspace */
+        #desktop-workspace {
+            flex: 1;
+            position: relative;
+            margin-top: 4px;
+            border: 3px inset #1e293b;
+            background: rgba(5, 5, 16, 0.4);
+            overflow: hidden;
+        }
+
+        /* Pop-up Window Styling (Uniform) */
+        .popup-card {
+            position: absolute;
+            width: 310px;
+            background: #0f172a;
+            border: 3px outset #475569;
+            box-shadow: 4px 4px 0px #000;
+            z-index: 20;
+            overflow: hidden;
+            animation: popup-bounce 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popup-bounce {
+            from { transform: scale(0.7); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .popup-header {
+            padding: 6px 10px;
+            background: linear-gradient(90deg, #1e293b, #0f172a);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #334155;
+        }
+
+        .popup-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: #38bdf8;
+            text-shadow: 1px 1px 0 #000;
+        }
+
+        .popup-body {
+            padding: 12px;
+        }
+
+        .source-badge {
+            display: inline-block;
+            font-size: 0.95rem;
+            padding: 2px 6px;
+            margin-bottom: 8px;
+            background: #1e293b;
+            border: 1px solid #475569;
+            color: #38bdf8;
+        }
+
+        .source-badge.verified {
+            background: #064e3b;
+            color: var(--retro-green);
+            border-color: var(--retro-green);
+        }
+
+        .popup-desc {
+            font-size: 1.15rem;
+            line-height: 1.2;
+            margin-bottom: 10px;
+            color: #cbd5e1;
+        }
+
+        /* Timer Bar */
+        .timer-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: #000;
+        }
+
+        .timer-bar-fill {
+            height: 100%;
+            width: 100%;
+            background: var(--retro-cyan);
+        }
+
+        /* Actions */
+        .popup-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            flex: 1;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.55rem;
+            padding: 8px 4px;
+            border: 2px outset #94a3b8;
+            cursor: pointer;
+            text-shadow: 1px 1px 0 #000;
+        }
+
+        .btn-install {
+            background: #15803d;
+            color: #fff;
+        }
+
+        .btn-install:hover {
+            background: #16a34a;
+        }
+
+        .btn-quarantine {
+            background: #b91c1c;
+            color: #fff;
+        }
+
+        .btn-quarantine:hover {
+            background: #dc2626;
+        }
+
+        /* Bottom Panel */
+        .bottom-panel {
+            margin-top: 8px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .upgrade-card {
+            flex: 1;
+            background: #0d1322;
+            border: 2px ridge #334155;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .upgrade-info h4 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.6rem;
+            color: var(--retro-cyan);
+            margin-bottom: 4px;
+        }
+
+        .upgrade-info p {
+            font-size: 0.95rem;
+            color: #94a3b8;
+        }
+
+        .buy-btn {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.55rem;
+            background: #047857;
+            border: 2px outset #34d399;
+            color: white;
+            padding: 6px 8px;
+            cursor: pointer;
+        }
+
+        .buy-btn:disabled {
+            background: #1e293b;
+            border-color: #475569;
+            color: #64748b;
+            cursor: not-allowed;
+        }
+
+        /* Pure Black End Screen */
+        .black-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000000;
+            z-index: 500;
+            cursor: pointer;
+        }
+
+        /* Retro Modals */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 200;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #0d1322;
+            border: 4px ridge var(--retro-cyan);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.3);
+            padding: 24px;
+            max-width: 520px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .modal-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.2rem;
+            color: var(--retro-cyan);
+            margin-bottom: 12px;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .modal-btn {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.75rem;
+            background: var(--retro-cyan);
+            border: 3px outset #7dd3fc;
+            color: #000;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-top: 16px;
+        }
+
+        .rule-list {
+            text-align: left;
+            margin: 14px 0;
+            background: #000;
+            border: 2px inset #334155;
+            padding: 12px;
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+
+        .rule-list li {
+            margin-bottom: 8px;
+            list-style-type: none;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="bgCanvas"></canvas>
+    <div class="crt-overlay"></div>
+
+    <div id="app">
+        <!-- Header HUD -->
+        <header>
+            <div class="brand-title">DEFENDER 64</div>
+            
+            <div class="hud-stats">
+                <div class="stat-box">
+                    <span class="stat-label">REBOOTS</span>
+                    <span class="stat-value" id="rebootsText" style="color:var(--retro-yellow);">0 / 3</span>
+                </div>
+
+                <div class="stat-box">
+                    <span class="stat-label">CREDITS</span>
+                    <span class="stat-value" id="creditsText">$0</span>
+                </div>
+
+                <div class="stat-box">
+                    <span class="stat-label">TIME</span>
+                    <span class="stat-value" id="timerText">0s</span>
+                </div>
+
+                <div class="stat-box shield-container">
+                    <span class="stat-label">SHIELD (<span id="shieldHpText">100</span>%)</span>
+                    <div class="meter-bg">
+                        <div class="meter-fill" id="shieldBar"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FOCAL REBOOT PANEL -->
+            <div class="reboot-focus-panel">
+                <button class="reboot-btn" id="rebootBtn" onclick="triggerReboot()" disabled>
+                    <span>🔄 EXECUTE REBOOT</span>
+                </button>
+                <div class="reboot-gauge-bar">
+                    <div class="reboot-gauge-fill" id="rebootGaugeFill"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Security Ticker -->
+        <div class="ticker-bar">
+            <span class="ticker-tag">DIRECTIVE</span>
+            <span id="tickerText">Install official patches to charge the Reboot Meter! Complete 3 Reboots to finish.</span>
+        </div>
+
+        <!-- Desktop Workspace -->
+        <div id="desktop-workspace"></div>
+
+        <!-- Upgrades Panel -->
+        <div class="bottom-panel">
+            <div class="upgrade-card">
+                <div class="upgrade-info">
+                    <h4>AUTO-PATCH DAEMON</h4>
+                    <p>Auto-patches 25% of verified updates</p>
+                </div>
+                <button class="buy-btn" id="buyAutoUpdate" onclick="buyUpgrade('autoUpdate', 100)">BUY $100</button>
+            </div>
+
+            <div class="upgrade-card">
+                <div class="upgrade-info">
+                    <h4>APP STORE FILTER</h4>
+                    <p>Highlights verified source badges</p>
+                </div>
+                <button class="buy-btn" id="buyFilter" onclick="buyUpgrade('filter', 150)">BUY $150</button>
+            </div>
+
+            <div class="upgrade-card">
+                <div class="upgrade-info">
+                    <h4>FIREWALL OVERCLOCK</h4>
+                    <p>Extends pop-up countdown timers</p>
+                </div>
+                <button class="buy-btn" id="buyTimer" onclick="buyUpgrade('timer', 200)">BUY $200</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Black End Screen (Click to restart) -->
+    <div class="black-screen hidden" id="blackScreen" onclick="restartGame()"></div>
+
+    <!-- Start / Tutorial Modal -->
+    <div class="modal" id="startModal">
+        <div class="modal-content">
+            <h1 class="modal-title">SYSTEM DEFENDER 64</h1>
+            <p style="font-size: 1.1rem; color: #94a3b8;">Outdated software threatens the city. Read pop-ups carefully to sort patches from malware!</p>
+            
+            <ul class="rule-list">
+                <li>✅ <b>INSTALL REAL PATCHES:</b> Builds Reboot energy & repairs shields (+15%).</li>
+                <li>☣️ <b>QUARANTINE FAKE ADS:</b> Prevents malware infection & shield damage.</li>
+                <li>🔄 <b>REBOOT TO FINISH:</b> Every patch fills the central <b>REBOOT METER</b>. Complete 3 Reboots to complete defense!</li>
+            </ul>
+
+            <button class="modal-btn" onclick="startGame()">START DEFENSE</button>
+        </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div class="modal hidden" id="gameOverModal">
+        <div class="modal-content" style="border-color: var(--retro-magenta);">
+            <h1 class="modal-title" style="color: var(--retro-magenta);">SYSTEM BREACHED</h1>
+            <p style="font-size: 1.1rem; color: #94a3b8;">Unpatched vulnerabilities caused a total city shield collapse.</p>
+
+            <div style="margin: 16px 0; background: #000; border: 2px inset #334155; padding: 12px; font-size: 1.2rem;">
+                <p>Time Survived: <b id="finalTime" style="color:var(--retro-cyan);">0s</b></p>
+                <p>Patches Applied: <b id="finalPatches" style="color:var(--retro-green);">0</b></p>
+                <p>Threats Quarantined: <b id="finalQuarantines" style="color:var(--retro-yellow);">0</b></p>
+                <p>Reboots Completed: <b id="finalReboots" style="color:#fff;">0 / 3</b></p>
+            </div>
+
+            <button class="modal-btn" onclick="restartGame()">RETRY SYSTEM DEFENSE</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Web Audio API Synth ---
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new AudioCtx();
+        }
+
+        function playSound(type) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'install') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(350, now);
+                osc.frequency.setValueAtTime(700, now + 0.08);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.16);
+                osc.start(now);
+                osc.stop(now + 0.16);
+            } else if (type === 'quarantine') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(250, now);
+                osc.frequency.linearRampToValueAtTime(90, now + 0.15);
+                gain.gain.setValueAtTime(0.18, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.15);
+                osc.start(now);
+                osc.stop(now + 0.15);
+            } else if (type === 'damage') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(110, now);
+                osc.frequency.linearRampToValueAtTime(30, now + 0.25);
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.25);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            } else if (type === 'reboot') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.exponentialRampToValueAtTime(540, now + 0.3);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+        }
+
+        // --- Data Templates ---
+        const REAL_PATCHES = [
+            { title: "OS Security Patch v14.2", source: "Official Settings", desc: "Fixes zero-day memory vulnerability in system kernel." },
+            { title: "Browser Security Hotfix", source: "Official App Store", desc: "Patches critical exploit executing untrusted web scripts." },
+            { title: "Firmware Shield Update", source: "System Settings", desc: "Resolves firewall bug and improves defense performance." },
+            { title: "Antivirus Database v9.1", source: "Trusted Store", desc: "Updates malware signature definitions against new exploits." }
+        ];
+
+        const FAKE_ADS = [
+            { title: "99 VIRUSES DETECTED!", source: "External Pop-up", desc: "CRITICAL ALERT! Click here to download CleanMaster Pro immediately!" },
+            { title: "YOU WON A FREE LAPTOP!", source: "Ad Network", desc: "You are the 1,000,000th visitor! Claim your prize now!" },
+            { title: "BOOST RAM SPEED 500%", source: "Unknown Web Page", desc: "Your PC is slow! Install Turbo Optimizer now to unlock full speed." },
+            { title: "SYSTEM CRITICAL WARNING", source: "Unverified Plugin", desc: "Driver corrupt! Click Install to repair Windows registry." }
+        ];
+
+        const DIRECTIVES = [
+            "Updates fix security vulnerabilities and software bugs.",
+            "Turn on automatic updates for OS, browsers, and applications.",
+            "Only install updates from official settings or trusted app stores.",
+            "Restart your system when required so updates can complete installation."
+        ];
+
+        // --- State ---
+        let gameState = {
+            active: false,
+            shield: 100,
+            maxShield: 100,
+            credits: 0,
+            rebootCharge: 0,
+            rebootsCompleted: 0,
+            targetReboots: 3,
+            timeElapsed: 0,
+            popups: [],
+            patchesApplied: 0,
+            threatsQuarantined: 0,
+            nextPopupId: 1,
+            upgrades: { autoUpdate: false, filter: false, timerExt: 0 }
+        };
+
+        let timers = { gameLoop: null, spawnLoop: null, tickerLoop: null };
+
+        // --- Canvas Graphics ---
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        let gridOffset = 0;
+        function drawBackground() {
+            ctx.fillStyle = '#050510';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const horizonY = canvas.height * 0.52;
+            
+            ctx.fillStyle = '#0f172a';
+            for (let i = 0; i < canvas.width; i += 40) {
+                const h = Math.floor((Math.sin(i * 0.08) * 60 + 80) / 10) * 10;
+                ctx.fillRect(i, horizonY - h, 36, h);
+            }
+
+            ctx.strokeStyle = 'rgba(0, 240, 255, 0.25)';
+            ctx.lineWidth = 2;
+
+            gridOffset = (gridOffset + 0.4) % 24;
+
+            for (let x = 0; x < canvas.width; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, horizonY);
+                ctx.lineTo((x - canvas.width / 2) * 3 + canvas.width / 2, canvas.height);
+                ctx.stroke();
+            }
+
+            for (let y = horizonY; y < canvas.height; y += 14) {
+                const drawY = y + (gridOffset * (y - horizonY) / 180);
+                if (drawY < canvas.height) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, drawY);
+                    ctx.lineTo(canvas.width, drawY);
+                    ctx.stroke();
+                }
+            }
+
+            requestAnimationFrame(drawBackground);
+        }
+        drawBackground();
+
+        // --- Logic ---
+        function startGame() {
+            initAudio();
+            document.getElementById('startModal').classList.add('hidden');
+            document.getElementById('gameOverModal').classList.add('hidden');
+            document.getElementById('blackScreen').classList.add('hidden');
+
+            gameState = {
+                active: true,
+                shield: 100,
+                maxShield: 100,
+                credits: 0,
+                rebootCharge: 0,
+                rebootsCompleted: 0,
+                targetReboots: 3,
+                timeElapsed: 0,
+                popups: [],
+                patchesApplied: 0,
+                threatsQuarantined: 0,
+                nextPopupId: 1,
+                upgrades: { autoUpdate: false, filter: false, timerExt: 0 }
+            };
+
+            document.getElementById('desktop-workspace').innerHTML = '';
+            updateHUD();
+
+            timers.gameLoop = setInterval(() => {
+                if (!gameState.active) return;
+                gameState.timeElapsed++;
+                document.getElementById('timerText').innerText = `${gameState.timeElapsed}s`;
+            }, 1000);
+
+            timers.spawnLoop = setInterval(() => {
+                if (!gameState.active) return;
+                spawnPopupsBatch(2);
+            }, 3500);
+
+            let tickerIdx = 0;
+            timers.tickerLoop = setInterval(() => {
+                tickerIdx = (tickerIdx + 1) % DIRECTIVES.length;
+                document.getElementById('tickerText').innerText = DIRECTIVES[tickerIdx];
+            }, 6000);
+
+            spawnPopupsBatch(2);
+        }
+
+        function spawnPopupsBatch(count) {
+            for (let i = 0; i < count; i++) {
+                if (gameState.popups.length >= 6) break;
+                createPopup();
+            }
+        }
+
+        function createPopup() {
+            const isReal = Math.random() < 0.5;
+
+            if (isReal && gameState.upgrades.autoUpdate && Math.random() < 0.3) {
+                gameState.credits += 15;
+                gameState.patchesApplied++;
+                addRebootCharge(20);
+                updateHUD();
+                return;
+            }
+
+            const data = isReal 
+                ? REAL_PATCHES[Math.floor(Math.random() * REAL_PATCHES.length)]
+                : FAKE_ADS[Math.floor(Math.random() * FAKE_ADS.length)];
+
+            const workspace = document.getElementById('desktop-workspace');
+            const maxX = Math.max(10, workspace.clientWidth - 330);
+            const maxY = Math.max(10, workspace.clientHeight - 220);
+
+            const popup = {
+                id: gameState.nextPopupId++,
+                isReal: isReal,
+                data: data,
+                duration: 6.0 + gameState.upgrades.timerExt,
+                timeLeft: 6.0 + gameState.upgrades.timerExt,
+                x: Math.floor(Math.random() * maxX),
+                y: Math.floor(Math.random() * maxY)
+            };
+
+            gameState.popups.push(popup);
+            renderPopupDOM(popup);
+        }
+
+        function renderPopupDOM(popup) {
+            const workspace = document.getElementById('desktop-workspace');
+            const card = document.createElement('div');
+            card.className = `popup-card`;
+            card.id = `popup-${popup.id}`;
+            card.style.left = `${popup.x}px`;
+            card.style.top = `${popup.y}px`;
+
+            const showVerifiedBadge = gameState.upgrades.filter && popup.isReal;
+
+            card.innerHTML = `
+                <div class="popup-header">
+                    <span class="popup-title">⚙️ SYSTEM NOTIFICATION</span>
+                    <span style="font-size:0.9rem; opacity:0.6;">#${popup.id}</span>
+                </div>
+                <div class="popup-body">
+                    <span class="source-badge ${showVerifiedBadge ? 'verified' : ''}">
+                        Source: ${popup.data.source} ${showVerifiedBadge ? '✓ VERIFIED' : ''}
+                    </span>
+                    <div style="font-family:'Press Start 2P', cursive; font-size:0.65rem; margin-bottom:6px; color:#fff;">${popup.data.title}</div>
+                    <div class="popup-desc">${popup.data.desc}</div>
+                    <div class="popup-actions">
+                        <button class="action-btn btn-install" onclick="handleAction(${popup.id}, 'install')">INSTALL</button>
+                        <button class="action-btn btn-quarantine" onclick="handleAction(${popup.id}, 'quarantine')">QUARANTINE</button>
+                    </div>
+                </div>
+                <div class="timer-bar-bg">
+                    <div class="timer-bar-fill" id="timer-bar-${popup.id}"></div>
+                </div>
+            `;
+
+            workspace.appendChild(card);
+            animatePopupTimer(popup);
+        }
+
+        function animatePopupTimer(popup) {
+            const interval = 100;
+            const timerObj = setInterval(() => {
+                if (!gameState.active) {
+                    clearInterval(timerObj);
+                    return;
+                }
+
+                popup.timeLeft -= interval / 1000;
+                const fillEl = document.getElementById(`timer-bar-${popup.id}`);
+                
+                if (fillEl) {
+                    const pct = Math.max(0, (popup.timeLeft / popup.duration) * 100);
+                    fillEl.style.width = `${pct}%`;
+                }
+
+                if (popup.timeLeft <= 0) {
+                    clearInterval(timerObj);
+                    handlePopupExpire(popup);
+                }
+            }, interval);
+        }
+
+        function handleAction(id, action) {
+            const idx = gameState.popups.findIndex(p => p.id === id);
+            if (idx === -1) return;
+
+            const popup = gameState.popups[idx];
+            removePopupDOM(id);
+            gameState.popups.splice(idx, 1);
+
+            if (action === 'install') {
+                if (popup.isReal) {
+                    playSound('install');
+                    gameState.credits += 25;
+                    gameState.patchesApplied++;
+                    gameState.shield = Math.min(gameState.maxShield, gameState.shield + 15);
+                    addRebootCharge(25);
+                } else {
+                    playSound('damage');
+                    damageShield(25);
+                }
+            } else if (action === 'quarantine') {
+                if (!popup.isReal) {
+                    playSound('quarantine');
+                    gameState.credits += 20;
+                    gameState.threatsQuarantined++;
+                    addRebootCharge(15);
+                } else {
+                    playSound('damage');
+                    damageShield(10);
+                }
+            }
+
+            updateHUD();
+        }
+
+        function handlePopupExpire(popup) {
+            const idx = gameState.popups.findIndex(p => p.id === popup.id);
+            if (idx === -1) return;
+
+            removePopupDOM(popup.id);
+            gameState.popups.splice(idx, 1);
+
+            if (!popup.isReal) {
+                playSound('damage');
+                damageShield(15);
+            }
+            updateHUD();
+        }
+
+        function removePopupDOM(id) {
+            const el = document.getElementById(`popup-${id}`);
+            if (el) el.remove();
+        }
+
+        function addRebootCharge(amount) {
+            gameState.rebootCharge = Math.min(100, gameState.rebootCharge + amount);
+        }
+
+        function damageShield(amount) {
+            gameState.shield = Math.max(0, gameState.shield - amount);
+            if (gameState.shield <= 0) {
+                triggerGameOver();
+            }
+        }
+
+        function triggerReboot() {
+            if (gameState.rebootCharge < 100 || !gameState.active) return;
+
+            playSound('reboot');
+            gameState.rebootCharge = 0;
+            gameState.rebootsCompleted++;
+            gameState.shield = gameState.maxShield;
+
+            // Clear all current popups instantly
+            gameState.popups.forEach(p => removePopupDOM(p.id));
+            gameState.popups = [];
+
+            updateHUD();
+
+            // After 3rd reboot, simply make the screen go black and end
+            if (gameState.rebootsCompleted >= gameState.targetReboots) {
+                gameState.active = false;
+                clearInterval(timers.gameLoop);
+                clearInterval(timers.spawnLoop);
+                clearInterval(timers.tickerLoop);
+
+                document.getElementById('blackScreen').classList.remove('hidden');
+            }
+        }
+
+        function buyUpgrade(type, cost) {
+            if (gameState.credits < cost) return;
+
+            gameState.credits -= cost;
+            if (type === 'autoUpdate') gameState.upgrades.autoUpdate = true;
+            if (type === 'filter') gameState.upgrades.filter = true;
+            if (type === 'timer') gameState.upgrades.timerExt += 2.5;
+
+            const btnId = type === 'autoUpdate' ? 'buyAutoUpdate' : type === 'filter' ? 'buyFilter' : 'buyTimer';
+            const btn = document.getElementById(btnId);
+            btn.disabled = true;
+            btn.innerText = 'ACTIVE';
+
+            updateHUD();
+        }
+
+        function updateHUD() {
+            document.getElementById('creditsText').innerText = `$${gameState.credits}`;
+            document.getElementById('rebootsText').innerText = `${gameState.rebootsCompleted} / ${gameState.targetReboots}`;
+            document.getElementById('shieldHpText').innerText = gameState.shield;
+            document.getElementById('shieldBar').style.width = `${(gameState.shield / gameState.maxShield) * 100}%`;
+
+            const rebootBtn = document.getElementById('rebootBtn');
+            const gaugeFill = document.getElementById('rebootGaugeFill');
+            
+            gaugeFill.style.width = `${gameState.rebootCharge}%`;
+
+            if (gameState.rebootCharge >= 100) {
+                rebootBtn.classList.add('ready');
+                rebootBtn.disabled = false;
+                rebootBtn.innerHTML = `⚡ EXECUTE REBOOT ⚡`;
+            } else {
+                rebootBtn.classList.remove('ready');
+                rebootBtn.disabled = true;
+                rebootBtn.innerHTML = `🔄 REBOOT (${gameState.rebootCharge}%)`;
+            }
+
+            if (!gameState.upgrades.autoUpdate) document.getElementById('buyAutoUpdate').disabled = gameState.credits < 100;
+            if (!gameState.upgrades.filter) document.getElementById('buyFilter').disabled = gameState.credits < 150;
+            if (gameState.upgrades.timerExt === 0) document.getElementById('buyTimer').disabled = gameState.credits < 200;
+        }
+
+        function triggerGameOver() {
+            gameState.active = false;
+            clearInterval(timers.gameLoop);
+            clearInterval(timers.spawnLoop);
+            clearInterval(timers.tickerLoop);
+
+            document.getElementById('finalTime').innerText = `${gameState.timeElapsed}s`;
+            document.getElementById('finalPatches').innerText = gameState.patchesApplied;
+            document.getElementById('finalQuarantines').innerText = gameState.threatsQuarantined;
+            document.getElementById('finalReboots').innerText = `${gameState.rebootsCompleted} / ${gameState.targetReboots}`;
+            document.getElementById('gameOverModal').classList.remove('hidden');
+        }
+
+        function restartGame() {
+            document.getElementById('gameOverModal').classList.add('hidden');
+            document.getElementById('blackScreen').classList.add('hidden');
+            startGame();
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && gameState.rebootCharge >= 100) {
+                e.preventDefault();
+                triggerReboot();
+            }
+        });
+    </script>
+</body>
+</html>

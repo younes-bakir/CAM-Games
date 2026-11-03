@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon City Gates - Password Terminal</title>
+<!-- Eishaan - CAM 2026 Project Mini Game 1 -->
+<!-- Google Font for authentic 64-bit retro arcade text -->
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+/* Eishaan: Pixelated 64-bit arcade theme with CSS Grid dashboard! */
+body {
+    background-color: #05000a; /* Darkest purple base */
+    color: #e6ccff;
+    font-family: 'Press Start 2P', monospace; /* 64-bit pixel font */
+    margin: 0; 
+    padding: 0;
+    min-height: 100vh;
+    image-rendering: pixelated; /* Crispy pixel rendering */
+}
+
+/* Background Canvas - Absolute positioned as requested */
+#matrixCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0; 
+}
+
+/* Wrapper to keep UI above the canvas so buttons are clickable! */
+.content-wrapper {
+    position: relative;
+    z-index: 10;
+    padding: 20px;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* DISCLAIMER: solid bright red, no border, transparent background */
+#disclaimer {
+    color: #ff0000;
+    background-color: transparent;
+    border: none;
+    font-size: 10px;
+    text-align: center;
+    padding: 10px;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+h1 {
+    text-align: center;
+    font-size: 18px;
+    color: #00ffff;
+    margin-top: 0;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+}
+
+/* DASHBOARD LAYOUT - Responsive Grid */
+.dashboard {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* Stack panels on smaller screens to prevent layout breaking */
+@media (max-width: 800px) {
+    .dashboard {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Blocky pixelated panel frames */
+.panel {
+    background-color: #120024;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Left side intel panel */
+.panel-side {
+    border: 4px solid #7700ff;
+}
+
+/* Main access control panel - Solid vibrant purple outline per request */
+.panel-main {
+    border: 4px solid #bf00ff;
+}
+
+.panel-header {
+    background-color: #260048;
+    padding: 10px;
+    margin: -20px -20px 20px -20px;
+    font-size: 12px;
+    text-align: center;
+}
+
+.panel-side .panel-header {
+    border-bottom: 4px solid #7700ff;
+    color: #b366ff;
+}
+
+.panel-main .panel-header {
+    border-bottom: 4px solid #bf00ff;
+    color: #e6b3ff;
+}
+
+ul {
+    list-style-type: square;
+    padding-left: 20px;
+    margin: 0;
+}
+
+li {
+    margin-bottom: 15px;
+    line-height: 1.8;
+    font-size: 9px;
+    color: #d9b3ff;
+}
+
+input[type="text"], input[type="password"] {
+    background-color: #05000a;
+    color: #00ffff;
+    border: 4px solid #00ffff;
+    padding: 15px;
+    font-size: 12px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 15px;
+    font-family: 'Press Start 2P', monospace;
+    outline: none;
+}
+
+.req {
+    color: #775599;
+    margin: 10px 0;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+button {
+    background-color: #1f0038;
+    color: #775599;
+    padding: 15px;
+    font-size: 10px;
+    border: 4px solid #775599;
+    margin-top: 15px;
+    width: 100%;
+    font-family: 'Press Start 2P', monospace;
+    cursor: default;
+}
+
+/* Enabled button state */
+button.enabled {
+    background-color: #bf00ff;
+    color: #ffffff;
+    border-color: #bf00ff;
+    cursor: pointer;
+}
+
+/* 64-bit Arcade style success popup */
+#successModal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #120024;
+    border: 4px solid #00ffff;
+    padding: 30px;
+    z-index: 100;
+    text-align: center;
+    width: 80%;
+    max-width: 450px;
+}
+
+/* Hide step 2 initially */
+#step2 {
+    display: none;
+}
+
+#errorMsg {
+    color: #ff0000;
+    font-size: 10px;
+    line-height: 1.6;
+    display: none;
+    margin-top: 10px;
+    border: 2px solid #ff0000;
+    padding: 10px;
+    text-align: center;
+    background-color: #240000;
+}
+</style>
+</head>
+<body>
+
+<!-- Eishaan: Matrix background canvas -->
+<canvas id="matrixCanvas"></canvas> 
+
+<div class="content-wrapper">
+    <div id="disclaimer">
+        WARNING: THIS IS A SIMULATION. WE ARE NOT ASKING FOR YOUR REAL PASSWORDS.
+    </div>
+
+    <h1>>_ NEON CITY 64-BIT GATE</h1>
+
+    <div class="dashboard">
+        <!-- SIDE PANEL: MISSION BRIEFING -->
+        <div class="panel panel-side">
+            <div class="panel-header">SYSTEM INTEL</div>
+            <p style="font-size: 10px; line-height: 1.7; color: #d099ff; margin-bottom: 20px;">
+                The Cadets are locked out of the Neon City gates. Create a secure password to unlock Sector 1.
+            </p>
+            <ul>
+                <li>Long, random, unique passwords are harder to guess.</li>
+                <li>Password managers help create and store unique codes.</li>
+                <li>Avoid reusing passwords! One leak shouldn't ruin everything.</li>
+            </ul>
+        </div>
+
+        <!-- MAIN PANEL: RETRO TERMINAL -->
+        <div class="panel panel-main">
+            <div class="panel-header">MAIN ACCESS CONTROL</div>
+            
+            <!-- PHASE 1: CREATE PASSWORD -->
+            <div id="step1">
+                <p style="font-size: 10px; line-height: 1.6; color: #e6b3ff; margin-top: 0; margin-bottom: 15px;">
+                    [PHASE 1] SET NEW PASSWORD KEY:
+                </p>
+                
+                <input type="text" id="creationInput" placeholder="TYPE PASSWORD...">
+                
+                <div id="checklist">
+                    <div class="req" id="req1">[ ] > 12 CHARACTERS</div>
+                    <div class="req" id="req2">[ ] HAS NUMBERS (0-9)</div>
+                    <div class="req" id="req3">[ ] HAS SYMBOLS (!@#$)</div>
+                </div>
+
+                <button id="saveBtn" disabled>COMMIT TO MAINFRAME</button>
+            </div>
+            
+            <!-- PHASE 2: LOGIN WITH NEW PASSWORD -->
+            <div id="step2">
+                <p style="font-size: 10px; line-height: 1.6; color: #00ffff; margin-top: 0; margin-bottom: 15px;">
+                    [PHASE 2] VERIFY SECURITY KEY:
+                </p>
+                <p style="font-size: 8px; color: #a3a3a3; margin-bottom: 15px;">
+                    Re-enter the exact password you just created to breach the gate.
+                </p>
+                
+                <input type="password" id="loginInput" placeholder="VERIFY PASSWORD...">
+                <div id="errorMsg">ACCESS DENIED: KEY MISMATCH</div>
+                
+                <button id="unlockBtn" class="enabled">UNLOCK NEON CITY</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom fake alert modal -->
+<div id="successModal">
+    <h2 style="color: #00ffff; font-size: 14px; margin-top: 0;">>_ ACCESS GRANTED</h2>
+    <p style="font-size: 10px; line-height: 1.8; color: #e6ccff; margin-bottom: 25px;">
+        SYSTEM RESTORED! WELCOME TO NEON CITY CADET.
+    </p>
+    <button onclick="document.getElementById('successModal').style.display='none'" class="enabled">ENTER SECTOR 2</button>
+</div>
+
+<script>
+    // Eishaan's debug logs
+    console.log("64-bit Terminal Booting Up...");
+
+    // DOM Elements
+    const creationInput = document.getElementById("creationInput");
+    const saveBtn = document.getElementById("saveBtn");
+    
+    const step1Div = document.getElementById("step1");
+    const step2Div = document.getElementById("step2");
+    
+    const loginInput = document.getElementById("loginInput");
+    const unlockBtn = document.getElementById("unlockBtn");
+    const errorMsg = document.getElementById("errorMsg");
+    
+    let savedPassword = ""; 
+
+    // --- PURPLE MATRIX CANVAS BACKGROUND ---
+    const canvas = document.getElementById('matrixCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    function resizeCanvas() {
+        // Ensuring it covers the whole document
+        canvas.width = document.documentElement.scrollWidth;
+        canvas.height = document.documentElement.scrollHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas(); // Set initial size
+
+    const letters = "010101NEONCITYHACK64BIT";
+    const matrix = letters.split("");
+    const font_size = 14;
+    const columns = Math.floor(window.innerWidth / font_size) + 1; // Base columns off viewport width
+    const drops = [];
+    for(let x = 0; x < columns; x++) {
+        drops[x] = 1; 
+    }
+
+    function drawMatrix() {
+        // Semi-transparent dark background for the trail effect
+        ctx.fillStyle = "rgba(5, 0, 10, 0.15)"; 
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Solid vibrant purple text - NO GLOW
+        ctx.fillStyle = "#bd00ff"; 
+        ctx.font = font_size + "px 'Press Start 2P'";
+        
+        for(let i = 0; i < drops.length; i++) {
+            const text = matrix[Math.floor(Math.random() * matrix.length)];
+            ctx.fillText(text, i * font_size, drops[i] * font_size);
+            
+            // Randomly reset drops to top
+            if(drops[i] * font_size > canvas.height && Math.random() > 0.975) {
+                drops[i] = 0;
+            }
+            drops[i]++;
+        }
+    }
+    
+    // Start animation loop
+    setInterval(drawMatrix, 60);
+
+    // --- PHASE 1: PASSWORD VALIDATION LOGIC ---
+    creationInput.addEventListener('keyup', function() {
+        let val = creationInput.value;
+
+        // Validation rules
+        let isLongEnough = val.length > 12;
+        let hasNumber = /[0-9]/.test(val);
+        let hasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(val);
+
+        // Update Checklist UI
+        document.getElementById("req1").style.color = isLongEnough ? "#bf00ff" : "#775599";
+        document.getElementById("req1").innerText = isLongEnough ? "[X] > 12 CHARACTERS" : "[ ] > 12 CHARACTERS";
+
+        document.getElementById("req2").style.color = hasNumber ? "#bf00ff" : "#775599";
+        document.getElementById("req2").innerText = hasNumber ? "[X] HAS NUMBERS (0-9)" : "[ ] HAS NUMBERS (0-9)";
+
+        document.getElementById("req3").style.color = hasSymbol ? "#bf00ff" : "#775599";
+        document.getElementById("req3").innerText = hasSymbol ? "[X] HAS SYMBOLS (!@#$)" : "[ ] HAS SYMBOLS (!@#$)";
+
+        // Enable save button if all criteria met
+        if(isLongEnough && hasNumber && hasSymbol) {
+            saveBtn.disabled = false;
+            saveBtn.classList.add("enabled");
+        } else {
+            saveBtn.disabled = true;
+            saveBtn.classList.remove("enabled");
+        }
+    });
+
+    // --- PHASE TRANSITION: SAVE TO LOGIN ---
+    saveBtn.addEventListener('click', function() {
+        if(!saveBtn.disabled) {
+            console.log("Password saved to local memory array...");
+            savedPassword = creationInput.value;
+            step1Div.style.display = "none";
+            step2Div.style.display = "block";
+        }
+    });
+    
+    // --- PHASE 2: VERIFICATION ---
+    unlockBtn.addEventListener('click', function() {
+        if(loginInput.value === savedPassword) {
+            console.log("Authentication successful. Granting access...");
+            errorMsg.style.display = "none";
+            document.getElementById("successModal").style.display = "block";
+        } else {
+            console.warn("Authentication failed. Mismatch detected.");
+            errorMsg.style.display = "block";
+            loginInput.value = ""; // Clear input for retry
+        }
+    });
+
+</script>
+
+</body>
+</html>
